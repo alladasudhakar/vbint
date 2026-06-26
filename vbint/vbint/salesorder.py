@@ -2,6 +2,8 @@ import frappe
 from frappe.utils import add_days, today
 from frappe import _
 
+log = frappe.logger("vbint", allow_site=True)
+log.setLevel("DEBUG")
 
 @frappe.whitelist(allow_guest=False)
 def create(order_data):
@@ -9,7 +11,8 @@ def create(order_data):
       Whitelisted method to create a Sales Order.
       Accepts order_data (dict).
    """
-   print("order_data = " + str(order_data))
+   log.info("salesorder.create()")
+   log.debug("order_data = " + str(order_data))
    try:
       # 1. Validate mandatory fields
       if not order_data.get("customer_name"):
@@ -22,15 +25,15 @@ def create(order_data):
       customer_name = order_data.get("customer_name")
       customer_id = ""
       ex_customer = frappe.db.exists("Customer", customer_name)
-      print(str(customer_name) + " -1- exists = " + str(ex_customer))
+      log.debug(str(customer_name) + " -1- exists = " + str(ex_customer))
       ex_customer = frappe.db.exists(
          "Customer", {"customer_name": customer_name})
-      print(str(customer_name) + " -2- exists = " + str(ex_customer))
+      log.debug(str(customer_name) + " -2- exists = " + str(ex_customer))
       # if not frappe.db.exists("Customer", customer_name): # customer id
 
       ex_customer = frappe.db.get_value(
          "Customer", {"customer_name": customer_name})
-      print(str(customer_name) + " -3- exists = " + str(ex_customer))
+      log.debug(str(customer_name) + " -3- exists = " + str(ex_customer))
       if not frappe.db.exists("Customer", {"customer_name": customer_name}):
          return {
             "status": "failed",

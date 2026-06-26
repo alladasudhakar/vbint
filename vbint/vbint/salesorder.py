@@ -21,6 +21,16 @@ def create(order_data):
       if not order_data.get("company") or not order_data.get("items"):
          frappe.throw(_("Company and Items are required in order_data"))
 
+      companyName = order_data.get("company")
+      if not frappe.db.exists("Company", {"company_name": companyName}):
+         return {
+            "status": "failed",
+            "app_order_id": "11497",
+            "error_code": "INVALID_COMPANY",
+            "error_message": "Company name not found in ERP",
+            "failed_field": "distributor.erp_company"
+         }
+
       # 2. Check if the customer already exists, otherwise create it
       customer_name = order_data.get("customer_name")
       customer_id = ""

@@ -5,6 +5,7 @@ from frappe import _
 log = frappe.logger("vbint", allow_site=True)
 log.setLevel("DEBUG")
 
+
 @frappe.whitelist(allow_guest=False)
 def create(order_data):
    """
@@ -15,11 +16,32 @@ def create(order_data):
    log.debug("order_data = " + str(order_data))
    try:
       # 1. Validate mandatory fields
-      if not order_data.get("customer_name"):
-         frappe.throw(_("Customer Name is required in customer_data"))
+      appOrderId = order_data.get("app_order_id")
+      if appOrderId is None:
+         return {
+            "status": "failed",
+            "error_code": "INVALID_APP_ORDER_ID",
+            "error_message": "APP Order Id missing",
+            "failed_field": "app_order_id"
+         }
 
-      if not order_data.get("company") or not order_data.get("items"):
-         frappe.throw(_("Company and Items are required in order_data"))
+      '''if not order_data.get("customer_name"):
+         frappe.throw(_("Customer Name is required in customer_data"))
+         return {
+            "status": "failed",
+            "error_code": "INVALID_APP_ORDER_ID",
+            "error_message": "APP Order Id missing",
+            "failed_field": "app_order_id"
+         }'''
+
+      if not order_data.get("company"):
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_COMPANY",
+            "error_message": "Company Name missing",
+            "failed_field": "company"
+         }
 
       companyName = order_data.get("company")
       if not frappe.db.exists("Company", {"company_name": companyName}):
@@ -56,14 +78,14 @@ def create(order_data):
             "app_order_id": "11497",
             "error_code": "INVALID_CUSTOMER",
             "error_message": "Distributor ID not found in ERP",
-            "failed_field": "distributor.erp_customer_id"
+            "failed_field": "distributor.name"
          }
 
       # 2. Create the Sales Order linked to the new Customer
       sales_order = frappe.get_doc({
          "doctype": "Sales Order",
          # Uses the dynamic ID generated above
-         "customer": customer_id,
+         "customer": ex_customer,
          # Must match an exact Company in your system
          "company": order_data.get("company"),
          "transaction_date": today(),

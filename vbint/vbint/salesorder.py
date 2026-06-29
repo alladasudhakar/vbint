@@ -109,6 +109,13 @@ def create(order_data):
             "failed_field": "shipping_address.address_id"
          }
 
+      for item in order_data.get("items", []):
+         itemCode = item.get("item_code")
+         itemQty = item.get("qty", 1)
+         itemRate = item.get("rate", 0)
+         log.debug("itemCode = " + str(itemCode) + " - itemQty = " + str(itemQty) +
+                   " -- itemRate = " + str(itemRate))
+
       # ---------- db validations ----------
       if not frappe.db.exists("Company", {"company_name": companyName}):
          return {
@@ -141,17 +148,17 @@ def create(order_data):
          }
 
       # 2. Create the Sales Order linked to the new Customer
-      sales_order = frappe.get_doc({
+      salesOrdRec = {
          "doctype": "Sales Order",
-         # Uses the dynamic ID generated above
          "customer": ex_customer,
-         # Must match an exact Company in your system
          "company": order_data.get("company"),
          "transaction_date": today(),
-         # Sets delivery deadline to 7 days from now
-         "delivery_date": order_data.get("delivery_date") or add_days(today(), 7),
+         "custom_so_reference_no": appOrderId,
+         "delivery_date": deliveryDate or add_days(today(), 7),
          "items": []
-      })
+      }
+      log.debug("salesOrdRec = " + str(salesOrdRec))
+      sales_order = frappe.get_doc(salesOrdRec)
 
       # 3. Map and append items to the Sales Order
       for item in order_data.get("items", []):

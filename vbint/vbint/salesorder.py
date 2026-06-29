@@ -32,18 +32,24 @@ def create(order_data):
          }
 
       # 2. Check if the customer already exists, otherwise create it
-      customer_name = order_data.get("customer_name")
+      log.debug("distributor = " + str(order_data.get("distributor")))
+      customer_name = order_data.get("distributor").get("name")
+      log.debug("customer_name = " + str(customer_name))
       customer_id = ""
-      ex_customer = frappe.db.exists("Customer", customer_name)
-      log.debug(str(customer_name) + " -1- exists = " + str(ex_customer))
+
       ex_customer = frappe.db.exists(
          "Customer", {"customer_name": customer_name})
       log.debug(str(customer_name) + " -2- exists = " + str(ex_customer))
-      # if not frappe.db.exists("Customer", customer_name): # customer id
 
-      ex_customer = frappe.db.get_value(
-         "Customer", {"customer_name": customer_name})
-      log.debug(str(customer_name) + " -3- exists = " + str(ex_customer))
+      if ex_customer is None:
+         return {
+            "status": "failed",
+            "app_order_id": "11497",
+            "error_code": "INVALID_CUSTOMER",
+            "error_message": "ex_customer is None",
+            "failed_field": "distributor.erp_customer_id"
+         }
+
       if not frappe.db.exists("Customer", {"customer_name": customer_name}):
          return {
             "status": "failed",

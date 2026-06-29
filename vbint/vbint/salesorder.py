@@ -115,7 +115,7 @@ def create(order_data):
             itemCode = item.get("item_code")
             itemQty = item.get("qty")
             itemRate = item.get("rate")
-            if all(v is None for v in [lineNo, itemCode, itemQty, itemRate]):
+            if any(v is None for v in [lineNo, itemCode, itemQty, itemRate]):
                return {
                   "status": "failed",
                   "app_order_id": appOrderId,

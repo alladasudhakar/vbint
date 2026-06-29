@@ -115,7 +115,7 @@ def create(order_data):
             itemCode = item.get("item_code")
             itemQty = item.get("qty")
             itemRate = item.get("rate")
-            if all(v is None for v in [itemCode, itemQty, itemRate]):
+            if all(v is None for v in [lineNo, itemCode, itemQty, itemRate]):
                return {
                   "status": "failed",
                   "app_order_id": appOrderId,
@@ -125,6 +125,16 @@ def create(order_data):
                }
             log.debug("itemCode = " + str(itemCode) + " - itemQty = " + str(itemQty) +
                       " -- itemRate = " + str(itemRate))
+            if frappe.db.exists("Item", itemCode):
+               log.debug("itemCode = " + str(itemCode) + " exists")
+            else:
+               return {
+                  "status": "failed",
+                  "app_order_id": appOrderId,
+                  "error_code": "INVALID_ITEM_DETAILS",
+                  "error_message": "Item Code does not exists",
+                  "failed_field": "items.line_no = " + str(lineNo)
+               }
       except:
          pass
 

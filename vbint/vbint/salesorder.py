@@ -108,13 +108,34 @@ def create(order_data):
             "error_message": "Shipping Address missing",
             "failed_field": "shipping_address.address_id"
          }
+      items = []
+      try:
+         for item in order_data.get("items", []):
+            lineNo = item.get("line_no")
+            itemCode = item.get("item_code")
+            itemQty = item.get("qty")
+            itemRate = item.get("rate")
+            if all(v is None for v in [itemCode, itemQty, itemRate]):
+               return {
+                  "status": "failed",
+                  "app_order_id": appOrderId,
+                  "error_code": "MISSING_ITEM_DETAILS",
+                  "error_message": "Item details missing",
+                  "failed_field": "items.line_no = " + str(lineNo)
+               }
+            log.debug("itemCode = " + str(itemCode) + " - itemQty = " + str(itemQty) +
+                      " -- itemRate = " + str(itemRate))
+      except:
+         pass
 
-      for item in order_data.get("items", []):
-         itemCode = item.get("item_code")
-         itemQty = item.get("qty", 1)
-         itemRate = item.get("rate", 0)
-         log.debug("itemCode = " + str(itemCode) + " - itemQty = " + str(itemQty) +
-                   " -- itemRate = " + str(itemRate))
+      if len(items) == 0:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_ITEM_DETAILS",
+            "error_message": "Item details missing",
+            "failed_field": "items"
+         }
 
       # ---------- db validations ----------
       if not frappe.db.exists("Company", {"company_name": companyName}):

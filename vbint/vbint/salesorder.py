@@ -16,7 +16,7 @@ def create(order_data):
    log.info("salesorder.create()")
    log.debug("order_data = " + str(order_data))
    try:
-      # 1. Validate mandatory fields
+      # ---------- input data validations ----------
       appOrderId = order_data.get("app_order_id")
       if appOrderId is None:
          return {
@@ -81,6 +81,27 @@ def create(order_data):
             "failed_field": "delivery_date"
          }
 
+      custAddress = order_data.get("billing_address").get("address_id")
+      if custAddress is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_CUSTOMER_ADDRESS",
+            "error_message": "Customer Address missing",
+            "failed_field": "billing_address.address_id"
+         }
+
+      shipAddress = order_data.get("shipping_address").get("address_id")
+      if shipAddress is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_SHIPPING_ADDRESS",
+            "error_message": "Shipping Address missing",
+            "failed_field": "shipping_address.address_id"
+         }
+
+      # ---------- db validations ----------
       if not frappe.db.exists("Company", {"company_name": companyName}):
          return {
             "status": "failed",
@@ -135,10 +156,10 @@ def create(order_data):
          })
 
       # 3. Save and Submit the Sales Order
-      sales_order.insert(ignore_permissions=True)
+      # sales_order.insert(ignore_permissions=True)
       # sales_order.submit()  # Finalizes the document and blocks edits
 
-      frappe.db.commit()  # Commits transactions safely
+      # frappe.db.commit()  # Commits transactions safely
       # return sales_order.name
       return {
          "status": "success",

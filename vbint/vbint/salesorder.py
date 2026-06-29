@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import add_days, today
 from frappe import _
+from datetime import datetime
 
 log = frappe.logger("vbint", allow_site=True)
 log.setLevel("DEBUG")
@@ -34,7 +35,8 @@ def create(order_data):
             "failed_field": "app_order_id"
          }'''
 
-      if not order_data.get("company"):
+      companyName = order_data.get("company")
+      if companyName is None:
          return {
             "status": "failed",
             "app_order_id": appOrderId,
@@ -43,7 +45,42 @@ def create(order_data):
             "failed_field": "company"
          }
 
-      companyName = order_data.get("company")
+      customerName = order_data.get("distributor").get("name")
+      log.debug("customerName = " + str(customerName))
+      if customerName is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_CUSTOMER",
+            "error_message": "Customer Name missing",
+            "failed_field": "distributor.name"
+         }
+
+      deliveryDateStr = order_data.get("delivery_date")
+      if deliveryDateStr is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_DELIVERY_DATE",
+            "error_message": "Delivery Date missing",
+            "failed_field": "delivery_date"
+         }
+
+      deliveryDate = None
+      try:
+         # Attempt standard parsing
+         deliveryDate = datetime.strptime(deliveryDateStr, "%Y-%m-%d")
+      except ValueError as e:
+         # Fallback or error logging
+         log.debug(f"Skipping bad data: '{deliveryDateStr}' (Error: {e})")
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_DELIVERY_DATE",
+            "error_message": "Delivery Date is invalid",
+            "failed_field": "delivery_date"
+         }
+
       if not frappe.db.exists("Company", {"company_name": companyName}):
          return {
             "status": "failed",
@@ -53,26 +90,19 @@ def create(order_data):
             "failed_field": "distributor.erp_company"
          }
 
-      # 2. Check if the customer already exists, otherwise create it
-      log.debug("distributor = " + str(order_data.get("distributor")))
-      customer_name = order_data.get("distributor").get("name")
-      log.debug("customer_name = " + str(customer_name))
-      customer_id = ""
-
       ex_customer = frappe.db.exists(
-         "Customer", {"customer_name": customer_name})
-      log.debug(str(customer_name) + " -2- exists = " + str(ex_customer))
+         "Customer", {"customer_name": customerName})
 
       if ex_customer is None:
          return {
             "status": "failed",
             "app_order_id": "11497",
             "error_code": "INVALID_CUSTOMER",
-            "error_message": "ex_customer is None",
-            "failed_field": "distributor.erp_customer_id"
+            "error_message": "Customer doesn't exists",
+            "failed_field": "distributor.name"
          }
 
-      if not frappe.db.exists("Customer", {"customer_name": customer_name}):
+      if not frappe.db.exists("Customer", {"customer_name": customerName}):
          return {
             "status": "failed",
             "app_order_id": "11497",
@@ -113,7 +143,7 @@ def create(order_data):
       return {
          "status": "success",
          "message": "Customer and Sales Order created successfully",
-         "customer": customer_id,
+         "customer": ex_customer,
          "sales_order": sales_order.name
       }
    except Exception as e:

@@ -172,6 +172,7 @@ def create(order_data):
       frappe.db.rollback()
       frappe.log_error(title="API Order Creation Failed",
                        message=frappe.get_traceback())
+      log.error("Sales Order Creation Failed", exc_info=True)
       return {
           "status": "failed",
           "error": str(e)

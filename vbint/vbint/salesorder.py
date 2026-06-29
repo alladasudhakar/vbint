@@ -81,7 +81,11 @@ def create(order_data):
             "failed_field": "delivery_date"
          }
 
-      custAddress = order_data.get("billing_address").get("address_id")
+      custAddress = None
+      try:
+         custAddress = order_data.get("billing_address").get("address_id")
+      except:
+         pass
       if custAddress is None:
          return {
             "status": "failed",
@@ -91,7 +95,11 @@ def create(order_data):
             "failed_field": "billing_address.address_id"
          }
 
-      shipAddress = order_data.get("shipping_address").get("address_id")
+      shipAddress = None
+      try:
+         shipAddress = order_data.get("shipping_address").get("address_id")
+      except:
+         pass
       if shipAddress is None:
          return {
             "status": "failed",
@@ -170,8 +178,6 @@ def create(order_data):
    except Exception as e:
       # Rollback mutations if anything fails during execution
       frappe.db.rollback()
-      frappe.log_error(title="API Order Creation Failed",
-                       message=frappe.get_traceback())
       log.error("Sales Order Creation Failed", exc_info=True)
       return {
           "status": "failed",

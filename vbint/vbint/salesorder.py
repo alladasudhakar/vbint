@@ -152,6 +152,20 @@ def create(order_data):
             "failed_field": "items"
          }
 
+      netWeight = None
+      try:
+         netWeight = order_data.get("summary").get("app_total_weight_kg")
+      except:
+         pass
+      if netWeight is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_NET_WEIGHT",
+            "error_message": "Net weight missing",
+            "failed_field": "summary.app_total_weight_kg"
+         }
+
       # ---------- db validations ----------
       if not frappe.db.exists("Company", {"company_name": companyName}):
          return {
@@ -191,20 +205,22 @@ def create(order_data):
          "transaction_date": today(),
          "custom_so_reference_no": appOrderId,
          "delivery_date": deliveryDate or add_days(today(), 7),
-         "items": []
+         "items": [],
+         "total_net_weight": netWeight
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)
 
       # 3. Map and append items to the Sales Order
-      for item in items:
+      '''for item in items:
          sales_order.append("items", {
             "item_code": item.get("item_code"),
             "qty": item.get("qty", 1),
             "rate": item.get("rate", 0),
             # Optional: Will fallback to item default if empty
             "warehouse": item.get("warehouse")
-         })
+         })'''
+      sales_order.append("items", items)
 
       # 3. Save and Submit the Sales Order
       sales_order.insert(ignore_permissions=True)

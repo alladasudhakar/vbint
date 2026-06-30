@@ -202,6 +202,7 @@ def create(order_data):
          "custom_so_reference_no": appOrderId,
          "delivery_date": deliveryDate or add_days(today(), 7),
          "items": [],
+         "custom_discount_based_on": "Weight",
          "total_net_weight": netWeight
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))

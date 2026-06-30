@@ -204,7 +204,8 @@ def create(order_data):
          "items": [],
          "custom_discount_based_on": "Weight",
          "total_net_weight": netWeight,
-         "custom_weight_value_discount_percentage": 9
+         "custom_weight_value_discount_percentage": 9,
+         "custom_allow_overwrite": 1
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)

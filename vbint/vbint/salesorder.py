@@ -162,6 +162,20 @@ def create(order_data):
             "failed_field": "summary.app_total_weight_kg"
          }
 
+      total = None
+      try:
+         total = order_data.get("summary").get("app_base_price_total")
+      except:
+         pass
+      if total is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_TOTAL",
+            "error_message": "total value missing",
+            "failed_field": "summary.app_base_price_total"
+         }
+
       # ---------- db validations ----------
       if not frappe.db.exists("Company", {"company_name": companyName}):
          return {
@@ -205,7 +219,8 @@ def create(order_data):
          "custom_discount_based_on": "Weight",
          "total_net_weight": netWeight,
          "custom_weight_value_discount_percentage": 9,
-         "custom_allow_overwrite": 1
+         "custom_allow_overwrite": 1,
+         "total": total
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)
@@ -217,7 +232,6 @@ def create(order_data):
             "qty": item.get("qty"),
             "rate": item.get("rate")
          })
-
 
       # 3. Save and Submit the Sales Order
       sales_order.insert(ignore_permissions=True)

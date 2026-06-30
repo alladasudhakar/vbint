@@ -203,7 +203,8 @@ def create(order_data):
          "delivery_date": deliveryDate or add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": "Weight",
-         "total_net_weight": netWeight
+         "total_net_weight": netWeight,
+         "custom_weight_value_discount_percentage": 9
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)

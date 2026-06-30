@@ -135,11 +135,7 @@ def create(order_data):
                   "error_message": "Item Code does not exists",
                   "failed_field": "items.line_no = " + str(lineNo)
                }
-            items.append({
-                "item_code": itemCode,
-                "qty": itemQty,
-                "rate": itemRate
-            })
+            items.append(item)
       except:
          pass
 
@@ -212,15 +208,13 @@ def create(order_data):
       sales_order = frappe.get_doc(salesOrdRec)
 
       # 3. Map and append items to the Sales Order
-      '''for item in items:
+      for item in items:
          sales_order.append("items", {
             "item_code": item.get("item_code"),
-            "qty": item.get("qty", 1),
-            "rate": item.get("rate", 0),
-            # Optional: Will fallback to item default if empty
-            "warehouse": item.get("warehouse")
-         })'''
-      sales_order.append("items", items)
+            "qty": item.get("qty"),
+            "rate": item.get("rate")
+         })
+
 
       # 3. Save and Submit the Sales Order
       sales_order.insert(ignore_permissions=True)

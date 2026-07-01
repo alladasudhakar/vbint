@@ -172,8 +172,41 @@ def create(order_data):
             "status": "failed",
             "app_order_id": appOrderId,
             "error_code": "MISSING_TOTAL",
-            "error_message": "total value missing",
+            "error_message": "total value parameter missing",
             "failed_field": "summary.app_base_price_total"
+         }
+      
+      discBasedOn = order_data.get("discount_based_on")
+      log.debug("discBasedOn = " + str(discBasedOn))
+      if discBasedOn is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_DISCOUNT_BASED_ON",
+            "error_message": "Discount Based On parameter missing",
+            "failed_field": "discount_based_on"
+         }
+
+      wvDiscPct = order_data.get("weight_value_discount_percentage")
+      log.debug("wvDiscPct = " + str(wvDiscPct))
+      if wvDiscPct is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+            "error_message": "Weight Value Discount parameter missing",
+            "failed_field": "weight_value_discount_percentage"
+         }
+
+      overWrite = order_data.get("custom_allow_overwrite")
+      log.debug("overWrite = " + str(overWrite))
+      if overWrite is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_OVER_WRITE",
+            "error_message": "Over Write parameter missing",
+            "failed_field": "custom_allow_overwrite"
          }
 
       # ---------- db validations ----------
@@ -216,10 +249,10 @@ def create(order_data):
          "custom_so_reference_no": appOrderId,
          "delivery_date": deliveryDate or add_days(today(), 7),
          "items": [],
-         "custom_discount_based_on": "Weight",
+         "custom_discount_based_on": discBasedOn,
          "total_net_weight": netWeight,
-         "custom_weight_value_discount_percentage": 9,
-         "custom_allow_overwrite": 1,
+         "custom_weight_value_discount_percentage": wvDiscPct,
+         "custom_allow_overwrite": overWrite,
          "total": total
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))

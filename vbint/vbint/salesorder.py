@@ -28,17 +28,24 @@ def create():
             "failed_field": "order_id"
          }
 
-      companyName = order_data.get("company")
-      if companyName is None:
+      orderDate = order_data.get("order_date")
+      if orderDate is None:
          return {
             "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_COMPANY",
-            "error_message": "Company Name missing",
-            "failed_field": "company"
+            "error_code": "INVALID_ORDER_DATE",
+            "error_message": "Order Date is missing",
+            "failed_field": "order_date"
          }
 
-      customerName = order_data.get("distributor").get("name")
+      orderStatus = order_data.get("status")
+      if orderStatus is None:
+         return {
+            "status": "failed",
+            "error_code": "INVALID_ORDER_STATUS",
+            "error_message": "Order Status is missing",
+            "failed_field": "status"
+         }
+      customerName = order_data.get("customer_name")
       log.debug("customerName = " + str(customerName))
       if customerName is None:
          return {
@@ -46,9 +53,9 @@ def create():
             "app_order_id": appOrderId,
             "error_code": "INVALID_CUSTOMER",
             "error_message": "Customer Name missing",
-            "failed_field": "distributor.name"
+            "failed_field": "customer_name"
          }
-
+      '''
       deliveryDateStr = order_data.get("delivery_date")
       if deliveryDateStr is None:
          return {
@@ -73,10 +80,10 @@ def create():
             "error_message": "Delivery Date is invalid",
             "failed_field": "delivery_date"
          }
-
+      '''
       custAddress = None
       try:
-         custAddress = order_data.get("billing_address").get("address_id")
+         custAddress = order_data.get("billing_address")
       except:
          pass
       if custAddress is None:
@@ -203,14 +210,6 @@ def create():
          }
 
       # ---------- db validations ----------
-      if not frappe.db.exists("Company", {"company_name": companyName}):
-         return {
-            "status": "failed",
-            "app_order_id": "11497",
-            "error_code": "INVALID_COMPANY",
-            "error_message": "Company name not found in ERP",
-            "failed_field": "distributor.erp_company"
-         }
 
       ex_customer = frappe.db.exists(
          "Customer", {"customer_name": customerName})
@@ -238,7 +237,8 @@ def create():
          "doctype": "Sales Order",
          "customer": ex_customer,
          "company": "Value Pack India Private Limited",
-         "transaction_date": today(),
+         "transaction_date": orderDate,
+         "status": orderStatus,
          "custom_so_reference_no": appOrderId,
          "delivery_date": deliveryDate or add_days(today(), 7),
          "items": [],

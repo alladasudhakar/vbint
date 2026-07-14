@@ -8,32 +8,25 @@ log.setLevel("DEBUG")
 
 
 @frappe.whitelist(allow_guest=False)
-def create(order_data):
+def create():
    """
       Whitelisted method to create a Sales Order.
-      Accepts order_data (dict).
    """
    log.info("salesorder.create()")
+   order_data = frappe.request.get_json()
    log.debug("order_data = " + str(order_data))
+   if not order_data:
+        frappe.throw("Empty or invalid JSON payload received.")
    try:
       # ---------- input data validations ----------
-      appOrderId = order_data.get("app_order_id")
+      appOrderId = order_data.get("order_id")
       if appOrderId is None:
          return {
             "status": "failed",
-            "error_code": "INVALID_APP_ORDER_ID",
-            "error_message": "APP Order Id missing",
-            "failed_field": "app_order_id"
+            "error_code": "INVALID_ORDER_ID",
+            "error_message": "Order Id missing",
+            "failed_field": "order_id"
          }
-
-      '''if not order_data.get("customer_name"):
-         frappe.throw(_("Customer Name is required in customer_data"))
-         return {
-            "status": "failed",
-            "error_code": "INVALID_APP_ORDER_ID",
-            "error_message": "APP Order Id missing",
-            "failed_field": "app_order_id"
-         }'''
 
       companyName = order_data.get("company")
       if companyName is None:
@@ -244,7 +237,7 @@ def create(order_data):
       salesOrdRec = {
          "doctype": "Sales Order",
          "customer": ex_customer,
-         "company": order_data.get("company"),
+         "company": "Value Pack India Private Limited",
          "transaction_date": today(),
          "custom_so_reference_no": appOrderId,
          "delivery_date": deliveryDate or add_days(today(), 7),

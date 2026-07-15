@@ -88,6 +88,10 @@ def create():
          "address_title": ("like", "%" + customerName + "%")
       })
       log.debug("addresses = " + str(addresses))
+      for add in addresses:
+         log.debug(add.address_title)
+         log.debug(add.address_line1)
+         log.debug(add.address_line2)
       custAddress = None
       try:
          custAddress = order_data.get("billing_address")

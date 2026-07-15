@@ -86,9 +86,10 @@ def create():
 
       addresses = frappe.db.get_list("Address", filters={
          "address_title": ("like", "%" + customerName + "%")
-      })
+      }, fields=["*"])
       log.debug("addresses = " + str(addresses))
       for add in addresses:
+         log.debug(add)
          log.debug(add.address_title)
          log.debug(add.address_line1)
          log.debug(add.address_line2)

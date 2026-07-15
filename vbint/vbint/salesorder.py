@@ -16,7 +16,7 @@ def create():
    order_data = frappe.request.get_json()
    log.debug("order_data = " + str(order_data))
    if not order_data:
-        frappe.throw("Empty or invalid JSON payload received.")
+      frappe.throw("Empty or invalid JSON payload received.")
    try:
       # ---------- input data validations ----------
       appOrderId = order_data.get("order_id")
@@ -81,6 +81,13 @@ def create():
             "failed_field": "delivery_date"
          }
       '''
+
+      # check customer addresses
+
+      customers = frappe.db.get_list("Customer", filters={
+         "customer_name": ("like", "%" + customerName + "%")
+      })
+      log.debug("customers = " + str(customers))
       custAddress = None
       try:
          custAddress = order_data.get("billing_address")
@@ -175,7 +182,7 @@ def create():
             "error_message": "total value parameter missing",
             "failed_field": "summary.app_base_price_total"
          }
-      
+
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
       if discBasedOn is None:
@@ -240,7 +247,7 @@ def create():
          "transaction_date": orderDate,
          "status": orderStatus,
          "custom_so_reference_no": appOrderId,
-         "delivery_date": deliveryDate or add_days(today(), 7),
+         "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": discBasedOn,
          "total_net_weight": netWeight,

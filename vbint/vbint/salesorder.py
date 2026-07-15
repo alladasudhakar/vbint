@@ -84,10 +84,10 @@ def create():
 
       # check customer addresses
 
-      customers = frappe.db.get_list("Customer", filters={
-         "customer_name": ("like", "%" + customerName + "%")
+      addresses = frappe.db.get_list("Address", filters={
+         "address_title": ("like", "%" + customerName + "%")
       })
-      log.debug("customers = " + str(customers))
+      log.debug("addresses = " + str(addresses))
       custAddress = None
       try:
          custAddress = order_data.get("billing_address")

@@ -93,6 +93,7 @@ def create():
          log.debug(add.address_title)
          log.debug(add.address_line1)
          log.debug(add.address_line2)
+      '''
       custAddress = None
       try:
          custAddress = order_data.get("billing_address")
@@ -120,12 +121,13 @@ def create():
             "error_message": "Shipping Address missing",
             "failed_field": "shipping_address.address_id"
          }
+      '''
       items = []
       try:
          for item in order_data.get("items", []):
             lineNo = item.get("line_no")
-            itemCode = item.get("item_code")
-            itemQty = item.get("qty")
+            itemCode = item.get("erp_code")
+            itemQty = item.get("quantity")
             itemRate = item.get("rate")
             if any(v is None for v in [lineNo, itemCode, itemQty, itemRate]):
                return {
@@ -160,9 +162,10 @@ def create():
             "failed_field": "items"
          }
 
+      '''
       netWeight = None
       try:
-         netWeight = order_data.get("summary").get("app_total_weight_kg")
+         netWeight = order_data.get("order_total").get("app_total_weight_kg")
       except:
          pass
       if netWeight is None:
@@ -220,7 +223,7 @@ def create():
             "error_message": "Over Write parameter missing",
             "failed_field": "custom_allow_overwrite"
          }
-
+      '''
       # ---------- db validations ----------
 
       ex_customer = frappe.db.exists(
@@ -254,11 +257,11 @@ def create():
          "custom_so_reference_no": appOrderId,
          "delivery_date": add_days(today(), 7),
          "items": [],
-         "custom_discount_based_on": discBasedOn,
-         "total_net_weight": netWeight,
-         "custom_weight_value_discount_percentage": wvDiscPct,
-         "custom_allow_overwrite": overWrite,
-         "total": total
+         "custom_discount_based_on": "Weight",
+         #"total_net_weight": netWeight,
+         #"custom_weight_value_discount_percentage": wvDiscPct,
+         #"custom_allow_overwrite": overWrite,
+         #"total": total
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)

@@ -131,7 +131,7 @@ def create():
             itemQty = item.get("quantity")
             itemRate = item.get("rate")
             itemWeight = item.get("weight_kg")
-            netWeight += int(int(itemQty)*float(itemWeight))
+            netWeight += int(int(itemQty) * float(itemWeight))
             if any(v is None for v in [itemCode, itemQty, itemRate, itemWeight]):
                return {
                   "status": "failed",
@@ -180,10 +180,10 @@ def create():
             "error_message": "Net weight missing",
             "failed_field": "summary.app_total_weight_kg"
          }
-
+      '''
       total = None
       try:
-         total = order_data.get("summary").get("app_base_price_total")
+         total = order_data.get("order_total").get("basic_amount")
       except:
          pass
       if total is None:
@@ -206,7 +206,18 @@ def create():
             "failed_field": "discount_based_on"
          }
 
-      wvDiscPct = order_data.get("weight_value_discount_percentage")
+      traDisc = order_data.get("order_total").get("trade_discount")
+      log.debug("traDisc = " + str(traDisc))
+      if traDisc is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+            "error_message": "Trade Discount parameter missing",
+            "failed_field": "order_total.trade_discount"
+         }
+
+      wvDiscPct = int((float(traDisc) / float(total))/100)
       log.debug("wvDiscPct = " + str(wvDiscPct))
       if wvDiscPct is None:
          return {
@@ -227,7 +238,7 @@ def create():
             "error_message": "Over Write parameter missing",
             "failed_field": "custom_allow_overwrite"
          }
-      '''
+
       # ---------- db validations ----------
 
       ex_customer = frappe.db.exists(
@@ -261,11 +272,11 @@ def create():
          "custom_so_reference_no": appOrderId,
          "delivery_date": add_days(today(), 7),
          "items": [],
-         "custom_discount_based_on": "Weight",
+         "custom_discount_based_on": discBasedOn,
          "total_net_weight": netWeight,
-         #"custom_weight_value_discount_percentage": wvDiscPct,
-         #"custom_allow_overwrite": overWrite,
-         #"total": total
+         "custom_weight_value_discount_percentage": wvDiscPct,
+         "custom_allow_overwrite": overWrite,
+         "total": total
       }
       log.debug("salesOrdRec = " + str(salesOrdRec))
       sales_order = frappe.get_doc(salesOrdRec)

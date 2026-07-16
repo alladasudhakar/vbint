@@ -284,8 +284,8 @@ def create():
       # 3. Map and append items to the Sales Order
       for item in items:
          sales_order.append("items", {
-            "item_code": item.get("item_code"),
-            "qty": item.get("qty"),
+            "item_code": item.get("erp_code"),
+            "qty": item.get("quantity"),
             "rate": item.get("rate")
          })
 

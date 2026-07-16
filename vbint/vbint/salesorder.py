@@ -124,12 +124,12 @@ def create():
       '''
       items = []
       try:
+         lineNo = 1
          for item in order_data.get("items", []):
-            lineNo = item.get("line_no")
             itemCode = item.get("erp_code")
             itemQty = item.get("quantity")
             itemRate = item.get("rate")
-            if any(v is None for v in [lineNo, itemCode, itemQty, itemRate]):
+            if any(v is None for v in [itemCode, itemQty, itemRate]):
                return {
                   "status": "failed",
                   "app_order_id": appOrderId,
@@ -150,6 +150,7 @@ def create():
                   "failed_field": "items.line_no = " + str(lineNo)
                }
             items.append(item)
+            lineNo += 1
       except:
          pass
 

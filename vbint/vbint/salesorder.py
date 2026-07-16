@@ -125,11 +125,14 @@ def create():
       items = []
       try:
          lineNo = 1
+         netWeight = 0
          for item in order_data.get("items", []):
             itemCode = item.get("erp_code")
             itemQty = item.get("quantity")
             itemRate = item.get("rate")
-            if any(v is None for v in [itemCode, itemQty, itemRate]):
+            itemWeight = item.get("weight_kg")
+            netWeight += int(int(itemQty)*float(itemWeight))
+            if any(v is None for v in [itemCode, itemQty, itemRate, itemWeight]):
                return {
                   "status": "failed",
                   "app_order_id": appOrderId,
@@ -259,7 +262,7 @@ def create():
          "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": "Weight",
-         #"total_net_weight": netWeight,
+         "total_net_weight": netWeight,
          #"custom_weight_value_discount_percentage": wvDiscPct,
          #"custom_allow_overwrite": overWrite,
          #"total": total

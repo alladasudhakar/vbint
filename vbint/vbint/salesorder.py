@@ -217,7 +217,7 @@ def create():
             "failed_field": "order_total.trade_discount"
          }
 
-      wvDiscPct = int((float(traDisc) / float(total))/100)
+      wvDiscPct = int((float(traDisc) * 100) / float(total))
       log.debug("wvDiscPct = " + str(wvDiscPct))
       if wvDiscPct is None:
          return {

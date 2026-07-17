@@ -195,6 +195,17 @@ def create():
             "failed_field": "summary.app_base_price_total"
          }
 
+      taxAmt = order_data.get("order_total").get("taxable_amount")
+      log.debug("taxAmt = " + str(taxAmt))
+      if taxAmt is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_TAXABLE_AMOUNT",
+            "error_message": "Taxable Amount parameter missing",
+            "failed_field": "order_total.taxable_amount"
+         }
+
       cusDisc = 0
       ppaidDisc = None
       try:
@@ -216,7 +227,7 @@ def create():
 
       cusDiscPct = 0
       try:
-         cusDiscPct = round(int((cusDisc / total)*100), 0)
+         cusDiscPct = round(int((cusDisc / taxAmt)*100), 2)
       except Exception as ee:
          log.error("cusDiscPct error", exc_info=True)
          #pass
@@ -341,16 +352,7 @@ def create():
             "failed_field": "order_total.cgst"
          }
 
-      taxAmt = order_data.get("order_total").get("taxable_amount")
-      log.debug("taxAmt = " + str(taxAmt))
-      if taxAmt is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "MISSING_TAXABLE_AMOUNT",
-            "error_message": "Taxable Amount parameter missing",
-            "failed_field": "order_total.taxable_amount"
-         }
+      
 
       log.debug("sgst rec = " + str(taxAmt)+" - "+str(sgstAmt)+" -- "+str(taxAmt+sgstAmt))
       log.debug("cgst rec = " + str(taxAmt)+" - "+str(cgstAmt)+" -- "+str(taxAmt+sgstAmt+cgstAmt))

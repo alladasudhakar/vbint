@@ -206,6 +206,17 @@ def create():
             "failed_field": "order_total.taxable_amount"
          }
 
+      graTotal = order_data.get("order_total").get("grand_total")
+      log.debug("graTotal = " + str(graTotal))
+      if graTotal is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_GRAND_TOTAL",
+            "error_message": "Grand Total parameter missing",
+            "failed_field": "order_total.grand_total"
+         }
+
       cusDisc = 0
       ppaidDisc = None
       try:
@@ -227,7 +238,7 @@ def create():
 
       cusDiscPct = 0
       try:
-         cusDiscPct = round(float((cusDisc / taxAmt)*100), 2)
+         cusDiscPct = round(float((cusDisc / graTotal)*100), 2)
       except Exception as ee:
          log.error("cusDiscPct error", exc_info=True)
          #pass

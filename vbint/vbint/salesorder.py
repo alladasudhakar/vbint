@@ -219,6 +219,7 @@ def create():
          cusDiscPct = round(int(cusDisc / total), 0)
       except:
          pass
+      log.debug("cusDiscPct = " + str(cusDiscPct))
 
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
@@ -299,7 +300,7 @@ def create():
          "items": [],
          "custom_discount_based_on": discBasedOn,
          "custom_special_discount_percentage": cusDiscPct,
-         "custom_special_discount_amount" : cusDisc,
+         #"custom_special_discount_amount" : cusDisc,
          "total_net_weight": netWeight,
          "custom_weight_value_discount_percentage": wvDiscPct,
          "custom_allow_overwrite": overWrite,

@@ -195,7 +195,7 @@ def create():
             "failed_field": "summary.app_base_price_total"
          }
 
-      cusDisc = None
+      cusDisc = 0
       ppaidDisc = None
       try:
          ppaidDisc = order_data.get("order_total").get("prepaid_discount")

@@ -376,6 +376,7 @@ def create():
             "type": "On Net Total",
             "description": "SGST",
             "account_head": "Output Tax SGST - VPIPL",
+            "cost_center": "Main - VPIPL"
             # "rate": 9,
             # "net_amount": taxAmt,
             # "tax_amount": sgstAmt,
@@ -385,6 +386,7 @@ def create():
             "type": "On Net Total",
             "description": "CGST",
             "account_head": "Output Tax CGST - VPIPL",
+            "cost_center": "Main - VPIPL"
             # "rate": 9,
             # "net_amount": taxAmt,
             # "tax_amount": cgstAmt,

@@ -388,7 +388,7 @@ def create():
             "rate": 9,
             "net_amount": taxAmt,
             "tax_amount": cgstAmt,
-            "total": taxAmt+sgstAmt+cgstAmt
+            "total": taxAmt+cgstAmt
          })
 
       # 3. Save and Submit the Sales Order

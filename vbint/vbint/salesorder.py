@@ -293,14 +293,41 @@ def create():
          type, account_head, net_amount, tax_amount, total
          Output Tax CGST - VPIPL
       '''
-      cgstAmt = 0
-      sgstAmt = 0
-      for item in items:
-         cgstAmt += float(item.get("cgst"))
-         sgstAmt += float(item.get("sgst"))
 
+      cgstAmt = order_data.get("order_total").get("cgst")
       log.debug("cgstAmt = " + str(cgstAmt))
+      if cgstAmt is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_CGST",
+            "error_message": "CGST parameter missing",
+            "failed_field": "order_total.cgst"
+         }
+      sgstAmt = order_data.get("order_total").get("sgst")
       log.debug("sgstAmt = " + str(sgstAmt))
+      if sgstAmt is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_SGST",
+            "error_message": "SGST parameter missing",
+            "failed_field": "order_total.cgst"
+         }
+
+      taxAmt = order_data.get("order_total").get("taxable_amount")
+      log.debug("taxAmt = " + str(taxAmt))
+      if taxAmt is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "MISSING_TAXABLE_AMOUNT",
+            "error_message": "Taxable Amount parameter missing",
+            "failed_field": "order_total.taxable_amount"
+         }
+
+      log.debug("sgst rec = " + str(taxAmt)+" - "+str(sgstAmt)+" -- "+str(taxAmt+sgstAmt))
+      log.debug("cgst rec = " + str(taxAmt)+" - "+str(cgstAmt)+" -- "+str(taxAmt+sgstAmt+cgstAmt))
       '''
       sales_order.append("taxes", {
             "type": "On Net Total",

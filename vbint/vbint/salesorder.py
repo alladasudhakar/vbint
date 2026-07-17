@@ -214,6 +214,12 @@ def create():
       log.debug("ebirdDisc = " + str(ebirdDisc))
       log.debug("cusDisc = " + str(cusDisc))
 
+      cusDiscPct = 0
+      try:
+         cusDiscPct = round(int(cusDisc / total), 0)
+      except:
+         pass
+
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
       if discBasedOn is None:
@@ -292,7 +298,8 @@ def create():
          "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": discBasedOn,
-         "custom_special_discount_amount" : cusDisc if not None else 0,
+         "custom_special_discount_percentage": cusDiscPct,
+         "custom_special_discount_amount" : cusDisc,
          "total_net_weight": netWeight,
          "custom_weight_value_discount_percentage": wvDiscPct,
          "custom_allow_overwrite": overWrite,

@@ -376,21 +376,21 @@ def create():
             "charge_type": "On Net Total",
             "description": "SGST",
             "account_head": "Output Tax SGST - VPIPL",
-            "cost_center": "Main - VPIPL"
-            # "rate": 9,
-            # "net_amount": taxAmt,
-            # "tax_amount": sgstAmt,
-            # "total": taxAmt+sgstAmt
+            "cost_center": "Main - VPIPL",
+            "rate": 9,
+            "net_amount": taxAmt,
+            "tax_amount": sgstAmt,
+            "total": taxAmt+sgstAmt
          })
       sales_order.append("taxes", {
             "charge_type": "On Net Total",
             "description": "CGST",
             "account_head": "Output Tax CGST - VPIPL",
-            "cost_center": "Main - VPIPL"
-            # "rate": 9,
-            # "net_amount": taxAmt,
-            # "tax_amount": cgstAmt,
-            # "total": taxAmt+cgstAmt
+            "cost_center": "Main - VPIPL",
+            "rate": 9,
+            "net_amount": taxAmt,
+            "tax_amount": cgstAmt,
+            "total": taxAmt+sgstAmt+cgstAmt
          })
 
       # 3. Save and Submit the Sales Order

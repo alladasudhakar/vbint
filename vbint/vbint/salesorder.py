@@ -374,6 +374,7 @@ def create():
 
       sales_order.append("taxes", {
             "type": "On Net Total",
+            "description": "SGST",
             "account_head": "Output Tax SGST - VPIPL",
             "net_amount": taxAmt,
             "tax_amount": sgstAmt,
@@ -381,6 +382,7 @@ def create():
          })
       sales_order.append("taxes", {
             "type": "On Net Total",
+            "description": "CGST",
             "account_head": "Output Tax CGST - VPIPL",
             "net_amount": taxAmt,
             "tax_amount": cgstAmt,

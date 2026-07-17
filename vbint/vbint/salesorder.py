@@ -217,8 +217,9 @@ def create():
       cusDiscPct = 0
       try:
          cusDiscPct = round(int(cusDisc / total), 0)
-      except:
-         pass
+      except Exception as ee:
+         log.error("cusDiscPct error", exc_info=True)
+         #pass
       log.debug("cusDiscPct = " + str(cusDiscPct))
 
       discBasedOn = order_data.get("discount_based_on")

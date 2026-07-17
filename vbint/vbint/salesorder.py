@@ -371,26 +371,26 @@ def create():
          type, account_head, net_amount, tax_amount, total
          Output Tax CGST - VPIPL
       '''
-      '''
+
       sales_order.append("taxes", {
             "type": "On Net Total",
             "description": "SGST",
             "account_head": "Output Tax SGST - VPIPL",
-            "rate": 9,
-            "net_amount": taxAmt,
-            "tax_amount": sgstAmt,
-            "total": taxAmt+sgstAmt
+            # "rate": 9,
+            # "net_amount": taxAmt,
+            # "tax_amount": sgstAmt,
+            # "total": taxAmt+sgstAmt
          })
       sales_order.append("taxes", {
             "type": "On Net Total",
             "description": "CGST",
             "account_head": "Output Tax CGST - VPIPL",
-            "rate": 9,
-            "net_amount": taxAmt,
-            "tax_amount": cgstAmt,
-            "total": taxAmt+cgstAmt
+            # "rate": 9,
+            # "net_amount": taxAmt,
+            # "tax_amount": cgstAmt,
+            # "total": taxAmt+cgstAmt
          })
-      '''
+
       # 3. Save and Submit the Sales Order
       sales_order.insert(ignore_permissions=True)
       # sales_order.submit()  # Finalizes the document and blocks edits

@@ -216,7 +216,7 @@ def create():
 
       cusDiscPct = 0
       try:
-         cusDiscPct = round(int(cusDisc / total), 0)
+         cusDiscPct = round(int((cusDisc / total)*100), 0)
       except Exception as ee:
          log.error("cusDiscPct error", exc_info=True)
          #pass

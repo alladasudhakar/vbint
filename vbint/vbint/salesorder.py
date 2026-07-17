@@ -195,6 +195,25 @@ def create():
             "failed_field": "summary.app_base_price_total"
          }
 
+      cusDisc = None
+      ppaidDisc = None
+      try:
+         ppaidDisc = order_data.get("order_total").get("prepaid_discount")
+         cusDisc += ppaidDisc
+      except:
+         pass
+
+      ebirdDisc = None
+      try:
+         ebirdDisc = order_data.get("order_total").get("early_bird_discount")
+         cusDisc += ebirdDisc
+      except:
+         pass
+
+      log.debug("ppaidDisc = " + str(ppaidDisc))
+      log.debug("ebirdDisc = " + str(ebirdDisc))
+      log.debug("cusDisc = " + str(cusDisc))
+
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
       if discBasedOn is None:
@@ -273,6 +292,7 @@ def create():
          "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": discBasedOn,
+         "custom_special_discount_amount" : cusDisc if not None else 0,
          "total_net_weight": netWeight,
          "custom_weight_value_discount_percentage": wvDiscPct,
          "custom_allow_overwrite": overWrite,

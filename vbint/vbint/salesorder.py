@@ -277,6 +277,14 @@ def create():
          #pass
       log.debug("cusSpeDiscPct = " + str(cusSpeDiscPct))
 
+      cusCasDiscPct = 0
+      try:
+         cusCasDiscPct = round(float(round((ebirdDisc / (total - (0.01 * wvDiscPct * total) - (ppaidDisc))),2)*100), 2)
+      except Exception as ee:
+         log.error("cusCasDiscPct error", exc_info=True)
+         #pass
+      log.debug("cusCasDiscPct = " + str(cusCasDiscPct))
+
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
       if discBasedOn is None:
@@ -328,7 +336,7 @@ def create():
          "custom_discount_based_on": discBasedOn,
          "custom_weight_value_discount_percentage": wvDiscPct,
          "custom_special_discount_percentage": cusSpeDiscPct,
-         #"custom_special_cash_percentage" : cusDisc,
+         "custom_special_cash_percentage" : cusCasDiscPct,
          "total_net_weight": netWeight,
          
          "custom_allow_overwrite": overWrite,

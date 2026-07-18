@@ -206,6 +206,17 @@ def create():
             "failed_field": "order_total.taxable_amount"
          }
 
+      traDisc = order_data.get("order_total").get("trade_discount")
+      log.debug("traDisc = " + str(traDisc))
+      if traDisc is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+            "error_message": "Trade Discount parameter missing",
+            "failed_field": "order_total.trade_discount"
+         }
+
       wvDiscPct = int((float(traDisc) * 100) / float(total))
       log.debug("wvDiscPct = " + str(wvDiscPct))
       if wvDiscPct is None:
@@ -277,16 +288,7 @@ def create():
             "failed_field": "discount_based_on"
          }
 
-      traDisc = order_data.get("order_total").get("trade_discount")
-      log.debug("traDisc = " + str(traDisc))
-      if traDisc is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
-            "error_message": "Trade Discount parameter missing",
-            "failed_field": "order_total.trade_discount"
-         }
+      
 
       
 

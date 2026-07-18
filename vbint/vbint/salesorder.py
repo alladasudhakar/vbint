@@ -206,6 +206,28 @@ def create():
             "failed_field": "order_total.taxable_amount"
          }
 
+      wvDiscPct = int((float(traDisc) * 100) / float(total))
+      log.debug("wvDiscPct = " + str(wvDiscPct))
+      if wvDiscPct is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+            "error_message": "Weight Value Discount parameter missing",
+            "failed_field": "weight_value_discount_percentage"
+         }
+
+      overWrite = order_data.get("custom_allow_overwrite")
+      log.debug("overWrite = " + str(overWrite))
+      if overWrite is None:
+         return {
+            "status": "failed",
+            "app_order_id": appOrderId,
+            "error_code": "INVALID_OVER_WRITE",
+            "error_message": "Over Write parameter missing",
+            "failed_field": "custom_allow_overwrite"
+         }
+
       graTotal = order_data.get("order_total").get("grand_total")
       log.debug("graTotal = " + str(graTotal))
       if graTotal is None:
@@ -236,13 +258,13 @@ def create():
       log.debug("ebirdDisc = " + str(ebirdDisc))
       log.debug("cusDisc = " + str(cusDisc))
 
-      cusDiscPct = 0
+      cusSpeDiscPct = 0
       try:
-         cusDiscPct = round(float((cusDisc / graTotal)*100), 2)
+         cusSpeDiscPct = round(float(((total - (wvDiscPct * total)) / total)*100), 2)
       except Exception as ee:
-         log.error("cusDiscPct error", exc_info=True)
+         log.error("cusSpeDiscPct error", exc_info=True)
          #pass
-      log.debug("cusDiscPct = " + str(cusDiscPct))
+      log.debug("cusSpeDiscPct = " + str(cusSpeDiscPct))
 
       discBasedOn = order_data.get("discount_based_on")
       log.debug("discBasedOn = " + str(discBasedOn))
@@ -266,27 +288,7 @@ def create():
             "failed_field": "order_total.trade_discount"
          }
 
-      wvDiscPct = int((float(traDisc) * 100) / float(total))
-      log.debug("wvDiscPct = " + str(wvDiscPct))
-      if wvDiscPct is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
-            "error_message": "Weight Value Discount parameter missing",
-            "failed_field": "weight_value_discount_percentage"
-         }
-
-      overWrite = order_data.get("custom_allow_overwrite")
-      log.debug("overWrite = " + str(overWrite))
-      if overWrite is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_OVER_WRITE",
-            "error_message": "Over Write parameter missing",
-            "failed_field": "custom_allow_overwrite"
-         }
+      
 
       # ---------- db validations ----------
 
@@ -322,10 +324,11 @@ def create():
          "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": discBasedOn,
-         "custom_special_discount_percentage": cusDiscPct,
-         #"custom_special_discount_amount" : cusDisc,
-         "total_net_weight": netWeight,
          "custom_weight_value_discount_percentage": wvDiscPct,
+         "custom_special_discount_percentage": cusSpeDiscPct,
+         #"custom_special_cash_percentage" : cusDisc,
+         "total_net_weight": netWeight,
+         
          "custom_allow_overwrite": overWrite,
          "total": total
       }

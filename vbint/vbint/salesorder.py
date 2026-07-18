@@ -336,9 +336,8 @@ def create():
          "custom_discount_based_on": discBasedOn,
          "custom_weight_value_discount_percentage": wvDiscPct,
          "custom_special_discount_percentage": cusSpeDiscPct,
-         "custom_special_cash_percentage" : cusCasDiscPct,
+         "custom_cash_discount_percentage" : cusCasDiscPct,
          "total_net_weight": netWeight,
-         
          "custom_allow_overwrite": overWrite,
          "total": total
       }

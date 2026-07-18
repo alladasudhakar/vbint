@@ -271,7 +271,7 @@ def create():
 
       cusSpeDiscPct = 0
       try:
-         cusSpeDiscPct = round(float(((total - (0.01 * wvDiscPct * total)) / total)*100), 2)
+         cusSpeDiscPct = round(float(round((ppaidDisc / (total - (0.01 * wvDiscPct * total))),2)*100), 2)
       except Exception as ee:
          log.error("cusSpeDiscPct error", exc_info=True)
          #pass

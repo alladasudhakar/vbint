@@ -206,27 +206,30 @@ def create():
             "failed_field": "order_total.taxable_amount"
          }
 
-      traDisc = order_data.get("order_total").get("trade_discount")
-      log.debug("traDisc = " + str(traDisc))
-      if traDisc is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
-            "error_message": "Trade Discount parameter missing",
-            "failed_field": "order_total.trade_discount"
-         }
+      traDiscPct = order_data.get("order_total").get("trade_discount_percent")
+      if traDiscPct is None:
+         traDisc = order_data.get("order_total").get("trade_discount")
+         log.debug("traDisc = " + str(traDisc))
+         if traDisc is None:
+            return {
+               "status": "failed",
+               "app_order_id": appOrderId,
+               "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+               "error_message": "Trade Discount parameter missing",
+               "failed_field": "order_total.trade_discount"
+            }
 
-      wvDiscPct = int((float(traDisc) * 100) / float(total))
-      log.debug("wvDiscPct = " + str(wvDiscPct))
-      if wvDiscPct is None:
-         return {
-            "status": "failed",
-            "app_order_id": appOrderId,
-            "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
-            "error_message": "Weight Value Discount parameter missing",
-            "failed_field": "weight_value_discount_percentage"
-         }
+         wvDiscPct = int((float(traDisc) * 100) / float(total))
+         log.debug("wvDiscPct = " + str(wvDiscPct))
+         traDiscPct = wvDiscPct
+         if wvDiscPct is None:
+            return {
+               "status": "failed",
+               "app_order_id": appOrderId,
+               "error_code": "INVALID_WEIGHT_VALUE_DISCOUNT",
+               "error_message": "Weight Value Discount parameter missing",
+               "failed_field": "weight_value_discount_percentage"
+            }
 
       overWrite = order_data.get("custom_allow_overwrite")
       log.debug("overWrite = " + str(overWrite))
@@ -269,20 +272,24 @@ def create():
       log.debug("ebirdDisc = " + str(ebirdDisc))
       log.debug("cusDisc = " + str(cusDisc))
 
-      cusSpeDiscPct = 0
-      try:
-         cusSpeDiscPct = round(float(round((ppaidDisc / (total - (0.01 * wvDiscPct * total))),2)*100), 2)
-      except Exception as ee:
-         log.error("cusSpeDiscPct error", exc_info=True)
-         #pass
+      cusSpeDiscPct = order_data.get("order_total").get("prepaid_discount_percent")
+      if cusSpeDiscPct is None:
+         try:
+            cusSpeDiscPct = round(float(round((ppaidDisc / (total - (0.01 * wvDiscPct * total))),2)*100), 2)
+            log.debug("cusSpeDiscPct calculate ")
+         except Exception as ee:
+            log.error("cusSpeDiscPct error", exc_info=True)
+            #pass
       log.debug("cusSpeDiscPct = " + str(cusSpeDiscPct))
 
-      cusCasDiscPct = 0
-      try:
-         cusCasDiscPct = round(float(round((ebirdDisc / (total - (0.01 * wvDiscPct * total) - (ppaidDisc))),2)*100), 2)
-      except Exception as ee:
-         log.error("cusCasDiscPct error", exc_info=True)
-         #pass
+      cusCasDiscPct = order_data.get("order_total").get("early_bird_discount_percent")
+      if cusCasDiscPct is None:
+         try:
+            cusCasDiscPct = round(float(round((ebirdDisc / (total - (0.01 * wvDiscPct * total) - (ppaidDisc))),2)*100), 2)
+            log.debug("cusCasDiscPct calculate ")
+         except Exception as ee:
+            log.error("cusCasDiscPct error", exc_info=True)
+            #pass
       log.debug("cusCasDiscPct = " + str(cusCasDiscPct))
 
       discBasedOn = order_data.get("discount_based_on")
@@ -295,10 +302,6 @@ def create():
             "error_message": "Discount Based On parameter missing",
             "failed_field": "discount_based_on"
          }
-
-      
-
-      
 
       # ---------- db validations ----------
 
@@ -334,7 +337,7 @@ def create():
          "delivery_date": add_days(today(), 7),
          "items": [],
          "custom_discount_based_on": discBasedOn,
-         "custom_weight_value_discount_percentage": wvDiscPct,
+         "custom_weight_value_discount_percentage": traDiscPct,
          "custom_special_discount_percentage": cusSpeDiscPct,
          "custom_cash_discount_percentage" : cusCasDiscPct,
          "total_net_weight": netWeight,

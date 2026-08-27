@@ -15,6 +15,12 @@ def create():
    log.info("salesorder.create()")
    order_data = frappe.request.get_json()
    log.debug("order_data = " + str(order_data))
+   return {
+      "status": "failed",
+      "error_code": "CREATE_ORDER_REQ_FAILED",
+      "error_message": "Create order request ignored",
+      "failed_field": "all"
+   }
    if not order_data:
       frappe.throw("Empty or invalid JSON payload received.")
    try:
@@ -272,24 +278,28 @@ def create():
       log.debug("ebirdDisc = " + str(ebirdDisc))
       log.debug("cusDisc = " + str(cusDisc))
 
-      cusSpeDiscPct = order_data.get("order_total").get("prepaid_discount_percent")
+      cusSpeDiscPct = order_data.get(
+         "order_total").get("prepaid_discount_percent")
       if cusSpeDiscPct is None:
          try:
-            cusSpeDiscPct = round(float(round((ppaidDisc / (total - (0.01 * wvDiscPct * total))),2)*100), 2)
+            cusSpeDiscPct = round(
+               float(round((ppaidDisc / (total - (0.01 * wvDiscPct * total))), 2) * 100), 2)
             log.debug("cusSpeDiscPct calculate ")
          except Exception as ee:
             log.error("cusSpeDiscPct error", exc_info=True)
-            #pass
+            # pass
       log.debug("cusSpeDiscPct = " + str(cusSpeDiscPct))
 
-      cusCasDiscPct = order_data.get("order_total").get("early_bird_discount_percent")
+      cusCasDiscPct = order_data.get("order_total").get(
+         "early_bird_discount_percent")
       if cusCasDiscPct is None:
          try:
-            cusCasDiscPct = round(float(round((ebirdDisc / (total - (0.01 * wvDiscPct * total) - (ppaidDisc))),2)*100), 2)
+            cusCasDiscPct = round(float(round(
+               (ebirdDisc / (total - (0.01 * wvDiscPct * total) - (ppaidDisc))), 2) * 100), 2)
             log.debug("cusCasDiscPct calculate ")
          except Exception as ee:
             log.error("cusCasDiscPct error", exc_info=True)
-            #pass
+            # pass
       log.debug("cusCasDiscPct = " + str(cusCasDiscPct))
 
       discBasedOn = order_data.get("discount_based_on")
@@ -339,7 +349,7 @@ def create():
          "custom_discount_based_on": discBasedOn,
          "custom_weight_value_discount_percentage": traDiscPct,
          "custom_special_discount_percentage": cusSpeDiscPct,
-         "custom_cash_discount_percentage" : cusCasDiscPct,
+         "custom_cash_discount_percentage": cusCasDiscPct,
          "total_net_weight": netWeight,
          "custom_allow_overwrite": overWrite,
          "total": total
@@ -354,8 +364,6 @@ def create():
             "qty": item.get("quantity"),
             "rate": item.get("rate")
          })
-
-
 
       cgstAmt = order_data.get("order_total").get("cgst")
       log.debug("cgstAmt = " + str(cgstAmt))
@@ -378,34 +386,34 @@ def create():
             "failed_field": "order_total.cgst"
          }
 
-      
-
-      log.debug("sgst rec = " + str(taxAmt)+" - "+str(sgstAmt)+" -- "+str(taxAmt+sgstAmt))
-      log.debug("cgst rec = " + str(taxAmt)+" - "+str(cgstAmt)+" -- "+str(taxAmt+sgstAmt+cgstAmt))
+      log.debug("sgst rec = " + str(taxAmt) + " - " +
+                str(sgstAmt) + " -- " + str(taxAmt + sgstAmt))
+      log.debug("cgst rec = " + str(taxAmt) + " - " +
+                str(cgstAmt) + " -- " + str(taxAmt + sgstAmt + cgstAmt))
       '''
          type, account_head, net_amount, tax_amount, total
          Output Tax CGST - VPIPL
       '''
 
       sales_order.append("taxes", {
-            "charge_type": "On Net Total",
-            "description": "SGST",
-            "account_head": "Output Tax SGST - VPIPL",
-            "cost_center": "Main - VPIPL",
-            "rate": 9,
-            "net_amount": taxAmt,
-            "tax_amount": sgstAmt,
-            "total": taxAmt+sgstAmt
+          "charge_type": "On Net Total",
+          "description": "SGST",
+          "account_head": "Output Tax SGST - VPIPL",
+          "cost_center": "Main - VPIPL",
+          "rate": 9,
+          "net_amount": taxAmt,
+          "tax_amount": sgstAmt,
+          "total": taxAmt + sgstAmt
          })
       sales_order.append("taxes", {
-            "charge_type": "On Net Total",
-            "description": "CGST",
-            "account_head": "Output Tax CGST - VPIPL",
-            "cost_center": "Main - VPIPL",
-            "rate": 9,
-            "net_amount": taxAmt,
-            "tax_amount": cgstAmt,
-            "total": taxAmt+sgstAmt+cgstAmt
+          "charge_type": "On Net Total",
+          "description": "CGST",
+          "account_head": "Output Tax CGST - VPIPL",
+          "cost_center": "Main - VPIPL",
+          "rate": 9,
+          "net_amount": taxAmt,
+          "tax_amount": cgstAmt,
+          "total": taxAmt + sgstAmt + cgstAmt
          })
 
       # 3. Save and Submit the Sales Order

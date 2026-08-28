@@ -2,14 +2,20 @@
 # For license information, please see license.txt
 
 import frappe
+import time
 from frappe import _
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+
+log = frappe.logger("vbint", allow_site=True)
+log.setLevel("DEBUG")
 
 def execute(filters=None):
     return CustomReceivableReport(filters).run_custom_report()
 
 class CustomReceivableReport(ReceivablePayableReport):
     def run_custom_report(self):
+        log.info("CustomReceivableReport.run()")
+        start_time = time.perf_counter()
         # 1. Define base parameters required by ERPNext internal logic
         args = {
             "party_type": "Customer",
@@ -56,7 +62,9 @@ class CustomReceivableReport(ReceivablePayableReport):
             "options": "currency",
             "width": 120
         })
-        
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        log.info(f"CustomReceivableReport.run() Execution time: {execution_time} seconds")
         return columns, data, chart, report_summary, skip_total_row
 
     def add_custom_details(self, data):

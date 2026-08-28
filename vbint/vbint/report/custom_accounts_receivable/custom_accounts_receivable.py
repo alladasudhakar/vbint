@@ -83,7 +83,7 @@ class CustomReceivableReport(ReceivablePayableReport):
             gstin = ""
             
             if party:
-                # --- Fetch Opening Balance ---
+                # --- Fetch Opening Balance for each record ---
                 opening = frappe.db.sql("""
                     SELECT SUM(debit - credit) 
                     FROM `tabGL Entry`

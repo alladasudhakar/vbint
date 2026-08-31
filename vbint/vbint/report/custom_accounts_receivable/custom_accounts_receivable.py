@@ -12,12 +12,16 @@ log.setLevel("DEBUG")
 
 
 def execute(filters=None):
+   # Force party type to be Customer
+   filters["party_type"] = "Customer"
+   filters["party_types"] = ["Customer"]
    return CustomReceivableReport(filters).run_custom_report()
 
 
 class CustomReceivableReport(ReceivablePayableReport):
    def __init__(self, filters=None):
       super().__init__(filters)
+      log.info("filters = " + str(filters))
       # Initialize an empty cache dictionary
       self.opening_balance_cache = {}
       self.customer_meta_cache = {}
@@ -27,8 +31,8 @@ class CustomReceivableReport(ReceivablePayableReport):
       start_time = time.perf_counter()
       # 1. Define base parameters required by ERPNext internal logic
       args = {
-          "party_type": "Customer",
-          "naming_by": ["Selling Settings", "cust_master_name"],
+         "account_type": "Receivable",
+		   "naming_by": ["Selling Settings", "cust_master_name"],
       }
 
       # 2. Call parent class run() method and unpack variables

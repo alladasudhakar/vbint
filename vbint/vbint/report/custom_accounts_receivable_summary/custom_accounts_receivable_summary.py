@@ -68,7 +68,6 @@ def execute(filters=None):
    # 3. Process each customer row to calculate the Open Balance
    for row in data:
       party = row.get("party")
-      log.info("party = " + str(party))
       if party:
          meta = customer_meta_cache.get(party, {})
          row["opening_balance"] = opening_balance_cache.get(party, 0.0)

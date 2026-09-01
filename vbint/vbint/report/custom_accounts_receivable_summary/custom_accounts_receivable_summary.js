@@ -22,10 +22,18 @@ frappe.query_reports["Custom Accounts Receivable Summary"] = {
             "reqd": 1
         },
         {
-            "fieldname": "customer",
-            "label": __("Customer"),
-            "fieldtype": "Link",
-            "options": "Customer"
+            fieldname: "party",
+            label: __("Party"),
+            fieldtype: "MultiSelectList",
+            options: "party_type",
+            get_data: function (txt) {
+                if (!frappe.query_report.filters) return;
+                //let party_type = frappe.query_report.get_filter_value("party_type");
+                let party_type = "Customer";
+                if (!party_type) return;
+
+                return frappe.db.get_link_options(party_type, txt);
+            },
         }
     ]
 };

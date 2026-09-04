@@ -106,11 +106,11 @@ def execute(filters=None):
              'credit_note': None, 'outstanding': value,
              'total_due': None, 'future_amount': None,
              'sales_person': [], 'party_type': 'Territory',
-             'range1': None, 'range2': None, 'range3': None,
+             'range0': None, 'range1': None, 'range2': None, 'range3': None,
              'range4': None, 'range5': None, 'currency': 'INR',
              'territory': '', 'advance': None, 'opening_balance': None}
       finalData.append(row)
-   #print(f"{finalData}")
+   # print(f"{finalData}")
    finalData.extend(filtered_data)
    return columns, finalData
 

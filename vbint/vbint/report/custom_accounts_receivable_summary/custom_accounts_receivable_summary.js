@@ -15,8 +15,15 @@ frappe.query_reports["Custom Accounts Receivable Summary"] = {
             "reqd": 1
         },
         {
+            "fieldname": "start_date",
+            "label": __("Start Date"),
+            "fieldtype": "Date",
+            "default": frappe.datetime.month_start(),
+            "reqd": 1
+        },
+        {
             "fieldname": "report_date",
-            "label": __("Posting Date"),
+            "label": __("End Date"),
             "fieldtype": "Date",
             "default": frappe.datetime.get_today(),
             "reqd": 1

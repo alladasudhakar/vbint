@@ -6,7 +6,7 @@ from frappe import _
 from frappe.utils import flt
 
 # Import the core ERPNext AR Summary execution engine
-from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as core_execute
+from .accounts_receivable_summary_filtered import execute as core_execute
 
 log = frappe.logger("vbint", allow_site=True)
 log.setLevel("DEBUG")
@@ -16,17 +16,43 @@ def execute(filters=None):
    if not filters:
       filters = {}
 
-   log.info("CARS :: filters = " + str(filters))
+   log.info("CARS :: filters =  " + str(filters))
    # Initialize an empty cache dictionary
    opening_balance_cache = {}
    customer_meta_cache = {}
    # 1. Fetch columns, data from the native report
    columns, data = core_execute(filters)
    # log.info("CARS :: data = " + str(data))
+   filtered_data = []
+   if filters.get("start_date"):
+      start_date = frappe.utils.getdate(filters.get("start_date"))
+      filtered_data = [
+         row for row in data
+         if frappe.utils.getdate(row.get("posting_date")) >= start_date
+      ]
+   else:
+      filtered_data = data
 
+   territorys = [row.get('territory') for row in filtered_data]
+   territoryList = list(dict.fromkeys(territorys))
+   print(territoryList)
+
+   outstDict = {}
+   for row in filtered_data:
+      if isinstance(row, dict):
+         if row.get("party"):
+            print(str(row))
+            # Map territory or fallback to 'Unassigned'
+            terr = row.get('territory') or "Unassigned Territory"
+            outst_amt = flt(row.get("outstanding", 0))
+            # Aggregate by territory
+            if terr not in outstDict:
+               outstDict[terr] = 0.0
+            outstDict[terr] += outst_amt
+   print(str(outstDict))
    # unique active customers present in this specific run
    customer_ids = list(set([row.get("party")
-                            for row in data if row.get("party")]))
+                            for row in filtered_data if row.get("party")]))
 
    if customer_ids:
       # Populate memory caches specifically for these active customers
@@ -34,7 +60,6 @@ def execute(filters=None):
          filters, customer_ids)
       customer_meta_cache = build_customer_meta_cache(customer_ids)
 
-   print("opening_balance_cache = " + str(opening_balance_cache))
    # 5. Inject column definitions at specific positions
    columns.insert(3, {
        "fieldname": "customer_address",
@@ -66,7 +91,7 @@ def execute(filters=None):
    })
 
    # 3. Process each customer row to calculate the Open Balance
-   for row in data:
+   for row in filtered_data:
       party = row.get("party")
       if party:
          meta = customer_meta_cache.get(party, {})
@@ -75,7 +100,19 @@ def execute(filters=None):
          row["mobile_no"] = meta.get("mobile_no", "")
          row["gstin"] = meta.get("gstin", "")
 
-   return columns, data
+   finalData = []
+   for key, value in outstDict.items():
+      row = {'party': key, 'invoiced': None, 'paid': None,
+             'credit_note': None, 'outstanding': value,
+             'total_due': None, 'future_amount': None,
+             'sales_person': [], 'party_type': 'Territory',
+             'range1': None, 'range2': None, 'range3': None,
+             'range4': None, 'range5': None, 'currency': 'INR',
+             'territory': '', 'advance': None, 'opening_balance': None}
+      finalData.append(row)
+   #print(f"{finalData}")
+   finalData.extend(filtered_data)
+   return columns, finalData
 
 
 def get_unallocated_advances(customer, company, report_date):

@@ -61,6 +61,12 @@ def execute(filters=None):
       customer_meta_cache = build_customer_meta_cache(customer_ids)
 
    # 5. Inject column definitions at specific positions
+   columns.insert(2, {
+       "fieldname": "party_name",
+       "label": _("Party Name"),
+       "fieldtype": "Small Text",
+       "width": 180
+   })
    columns.insert(3, {
        "fieldname": "customer_address",
        "label": _("Customer Address"),
@@ -99,6 +105,7 @@ def execute(filters=None):
          row["customer_address"] = meta.get("address", "")
          row["mobile_no"] = meta.get("mobile_no", "")
          row["gstin"] = meta.get("gstin", "")
+         row["party_name"] = meta.get("customer_name", "")
 
    finalData = []
    for key, value in outstDict.items():
@@ -174,6 +181,7 @@ def build_customer_meta_cache(customer_ids):
    meta_records = frappe.db.sql("""
          SELECT 
                cust.name as customer,
+               cust.customer_name as customer_name,
                cust.gstin as c_gstin,
                addr.gstin as a_gstin,
                addr.address_line1,
@@ -204,11 +212,13 @@ def build_customer_meta_cache(customer_ids):
       # Process cross-reference fields safely
       mobile = rec.customer_mobile or rec.address_phone or ""
       gstin = rec.c_gstin or rec.a_gstin or ""
+      cust_name = rec.customer_name or ""
 
       cacheData[rec.customer] = {
-          "address": full_address,
-          "mobile_no": mobile,
-          "gstin": gstin
+         "address": full_address,
+         "mobile_no": mobile,
+         "gstin": gstin,
+         "customer_name": cust_name
       }
 
    return cacheData

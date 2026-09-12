@@ -1,7 +1,7 @@
 {
  "app": "vbint",
  "charts": [],
- "content": "[{\"id\":\"Hew_aP4ZK3\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Welcome to the VBond Reports workspace</span>\",\"col\":12}},{\"id\":\"2sDlJe_fbY\",\"type\":\"paragraph\",\"data\":{\"text\":\"Click on \\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t to edit\",\"col\":12}},{\"id\":\"D4QNR64Mdu\",\"type\":\"paragraph\",\"data\":{\"text\":\"adada\",\"col\":12}}]",
+ "content": "[{\"id\":\"Hew_aP4ZK3\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">VBond Reports workspace</span>\",\"col\":12}},{\"id\":\"rThiCKKqxm\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":6}}]",
  "creation": "2026-09-12 08:04:40.506403",
  "custom_blocks": [],
  "docstatus": 0,
@@ -14,10 +14,10 @@
  "label": "VBond Reports",
  "link_type": "DocType",
  "links": [
- {
+  {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Customizations",
+   "label": "Reports",
    "link_count": 3,
    "link_type": "DocType",
    "onboard": 0,
@@ -35,28 +35,26 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Custom E-Invoice Summary Report",
    "link_count": 0,
    "link_to": "Custom E-Invoice Summary Report",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "30 Days Payment",
    "link_count": 0,
    "link_to": "30 Days Payment",
    "link_type": "Report",
    "onboard": 0,
-   "report_ref_doctype": "Sales Invoice",
    "type": "Link"
   }
  ],
- "modified": "2026-09-12 09:33:52.144938",
+ "modified": "2026-09-12 10:10:38.027830",
  "modified_by": "Administrator",
  "module": "Vbint",
  "name": "VBond Reports",

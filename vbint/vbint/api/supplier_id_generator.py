@@ -6,6 +6,7 @@ log = frappe.logger("vbint", allow_site=True)
 log.setLevel("DEBUG")
 
 
+@frappe.whitelist()
 def generate_supplier_id(doc, method):
    # 1. Fallback if no region is selected
    if not doc.custom_region:
@@ -24,6 +25,7 @@ def generate_supplier_id(doc, method):
    # doc.name = make_autoname(naming_series_format)
 
 
+@frappe.whitelist()
 def update_supplier_id(doc, method):
    # 1. Skip if this is a brand new document (autoname handles creation)
    if doc.is_new():

@@ -138,8 +138,8 @@ app_license = "mit"
 # Hook on document methods and events
 doc_events = {
    "Supplier": {
-      "autoname": "vbint.vbint.api.generate_supplier_id",
-      "before_save": "vbint.vbint.api.update_supplier_id"
+      "autoname": "vbint.vbint.api.supplier_id_generator.generate_supplier_id",
+      "before_save": "vbint.vbint.api.supplier_id_generator.update_supplier_id"
    }
 }
 # doc_events = {

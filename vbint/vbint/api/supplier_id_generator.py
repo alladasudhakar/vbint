@@ -33,7 +33,9 @@ def update_supplier_id(doc, method):
 
    # 2. Fetch the pristine, unaltered document from the database to compare
    db_doc = frappe.get_doc("Supplier", doc.name)
-   log.info("update_supplier_id details - " + str(db_doc))
+   # 1. Convert the Frappe Document object into a standard Python dictionary
+   doc_dict = doc.as_dict()
+   log.info("update_supplier_id details - " + str(doc_dict))
    '''
    # Check if the region field was modified during this save action
    if doc.custom_region != db_doc.custom_region:

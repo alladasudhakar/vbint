@@ -136,7 +136,11 @@ app_license = "mit"
 # Document Events
 # ---------------
 # Hook on document methods and events
-
+doc_events = {
+   "Supplier": {
+      "autoname": "vbint.api.generate_supplier_id"
+   }
+}
 # doc_events = {
 # 	"*": {
 # 		"on_update": "method",
@@ -246,4 +250,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

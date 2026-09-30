@@ -23,8 +23,8 @@ frappe.ui.form.on("Employee Overtime Tool", {
       frm.disable_save();
 
       // Add a primary custom button on the header
-      frm.page.set_primary_action(__('Submit Overtime'), function () {
-         frm.events.submit_attendance(frm);
+      frm.page.set_primary_action(__('Save'), function () {
+         frm.events.save_overtime(frm);
       }, 'tick');
 
       // Auto-fetch when fields change
@@ -33,24 +33,35 @@ frappe.ui.form.on("Employee Overtime Tool", {
       frm.fields_dict['department'].df.change = () => frm.trigger('fetch_and_cache_employees');
    },
 
-   submit_attendance: function (frm) {
+   save_overtime: function (frm) {
+      if (!frm.doc.date) {
+         frappe.msgprint(__('Please select Overtime Date.'));
+         return;
+      }
+      if (!frm.doc.company) {
+         frappe.msgprint(__('Please select Company.'));
+         return;
+      }
       if (!frm.doc.employees || frm.doc.employees.length === 0) {
          frappe.msgprint(__('No employee records available to submit.'));
          return;
       }
 
       frappe.call({
-         method: "custom_app.api.save_attendance_records",
+         method: "vbint.vbint.employee_overtime_tool_api.save_overtime_records",
          args: {
-            rows: frm.doc.employees,
             date: frm.doc.date,
-            company: frm.doc.company
+            company: frm.doc.company,
+            rows: frm.doc.employees
          },
          freeze: true,
          callback: function (r) {
             if (r.message === "Success") {
-               frappe.show_alert({ message: __('Attendance processed successfully!'), indicator: 'green' });
+               frappe.show_alert({ message: __('Overtime data processed successfully!'), indicator: 'green' });
                frm.trigger('fetch_employees');
+            } else {
+               frappe.show_alert({ message: __('Error saving Overtime data.'), indicator: 'red' });
+               frappe.set_route('List', frm.doctype);
             }
          }
       });

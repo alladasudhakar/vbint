@@ -24,13 +24,15 @@
          "fieldname": "date",
          "fieldtype": "Date",
          "label": "Overtime Date",
-         "options": "Default: Today"
+         "options": "Default: Today",
+         "reqd": 1
       },
       {
          "fieldname": "company",
          "fieldtype": "Link",
          "label": "Company ",
-         "options": "Company"
+         "options": "Company",
+         "reqd": 1
       },
       {
          "fieldname": "col_break",

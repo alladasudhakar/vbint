@@ -105,11 +105,15 @@ def get_employees_for_child_table(doctype, txt, searchfield, start, page_len, fi
 
 
 @frappe.whitelist()
-def save_attendance_records(rows, date, company):
+def save_overtime_records(date, company, rows):
    # Rows are received automatically as strings/dicts depending on submission format
-   data = json.loads(rows) if isinstance(rows, str) else rows
+   records = json.loads(rows) if isinstance(rows, str) else rows
+   if not isinstance(records, list):
+      return "Failure"
 
-   for row in data:
+   for row in records:
+      log.info("row = " + str(row))
+      '''
       if row.get("attendance_record"):
          # Update status on existing attendance document entry fields
          frappe.db.set_value(
@@ -125,7 +129,8 @@ def save_attendance_records(rows, date, company):
                "company": company
             }
          )
-         doc.insert()
-         doc.submit()
+         #doc.insert()
+         #doc.submit()
+      '''
 
    return "Success"

@@ -69,7 +69,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
 });
 
 // Optional: Automatically fetch the Employee Name when a user manually picks an employee from the dropdown
-frappe.ui.form.on('Employee Overtime Tool Row', {
+frappe.ui.form.on('Employee Overtime Tool Item', {
 
    // Triggers when a row is rendered or opened in form view
    form_render: function (frm, cdt, cdn) {

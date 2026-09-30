@@ -59,7 +59,7 @@
          "fieldname": "employees",
          "fieldtype": "Table",
          "label": "Employees",
-         "options": "Employee Overtime Tool Row"
+         "options": "Employee Overtime Tool Item"
       }
    ],
    "grid_page_length": 50,

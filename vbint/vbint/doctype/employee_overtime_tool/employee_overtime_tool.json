@@ -1,89 +1,89 @@
 {
- "actions": [],
- "allow_bulk_edit": 1,
- "allow_rename": 1,
- "creation": "2026-09-28 14:10:32.666595",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "section_break_x9qd",
-  "date",
-  "company",
-  "col_break",
-  "department",
-  "shift",
-  "employees_section",
-  "employees"
- ],
- "fields": [
-  {
-   "fieldname": "section_break_x9qd",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Overtime Date",
-   "options": "Default: Today"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company ",
-   "options": "Company"
-  },
-  {
-   "fieldname": "col_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Department"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "label": "Shift Type",
-   "options": "Shift Type"
-  },
-  {
-   "fieldname": "employees_section",
-   "fieldtype": "Section Break",
-   "label": "Employees Section"
-  },
-  {
-   "fieldname": "employees",
-   "fieldtype": "Table",
-   "label": "Employees",
-   "options": "Employee Overtime Tool Row"
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "issingle": 1,
- "links": [],
- "modified": "2026-09-28 14:37:00.243881",
- "modified_by": "Administrator",
- "module": "Vbint",
- "name": "Employee Overtime Tool",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": []
+   "actions": [],
+   "allow_bulk_edit": 1,
+   "allow_rename": 1,
+   "creation": "2026-09-28 14:10:32.666595",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+      "section_break_x9qd",
+      "date",
+      "company",
+      "col_break",
+      "department",
+      "shift",
+      "employees_section",
+      "employees"
+   ],
+   "fields": [
+      {
+         "fieldname": "section_break_x9qd",
+         "fieldtype": "Section Break"
+      },
+      {
+         "fieldname": "date",
+         "fieldtype": "Date",
+         "label": "Overtime Date",
+         "options": "Default: Today"
+      },
+      {
+         "fieldname": "company",
+         "fieldtype": "Link",
+         "label": "Company ",
+         "options": "Company"
+      },
+      {
+         "fieldname": "col_break",
+         "fieldtype": "Column Break"
+      },
+      {
+         "fieldname": "department",
+         "fieldtype": "Link",
+         "label": "Department",
+         "options": "Department"
+      },
+      {
+         "fieldname": "shift",
+         "fieldtype": "Link",
+         "label": "Shift Type",
+         "options": "Shift Type"
+      },
+      {
+         "fieldname": "employees_section",
+         "fieldtype": "Section Break",
+         "label": "Employees Section"
+      },
+      {
+         "fieldname": "employees",
+         "fieldtype": "Table",
+         "label": "Employees",
+         "options": "Employee Overtime Tool Row"
+      }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "issingle": 0,
+   "links": [],
+   "modified": "2026-09-28 14:37:00.243881",
+   "modified_by": "Administrator",
+   "module": "Vbint",
+   "name": "Employee Overtime Tool",
+   "owner": "Administrator",
+   "permissions": [
+      {
+         "create": 1,
+         "delete": 1,
+         "email": 1,
+         "print": 1,
+         "read": 1,
+         "role": "System Manager",
+         "share": 1,
+         "write": 1
+      }
+   ],
+   "row_format": "Dynamic",
+   "rows_threshold_for_grid_search": 20,
+   "sort_field": "creation",
+   "sort_order": "DESC",
+   "states": []
 }

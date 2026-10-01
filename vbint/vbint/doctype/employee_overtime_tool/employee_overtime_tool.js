@@ -14,7 +14,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
    },
 
    refresh: function (frm) {
-      if (!frm.doc.date) {
+      if (frm.is_new() && !frm.doc.date) {
          frm.set_value('date', frappe.datetime.get_today());
       }
       fetch_and_cache_employees(frm);
@@ -34,6 +34,15 @@ frappe.ui.form.on("Employee Overtime Tool", {
    },
 
    save_overtime: function (frm) {
+      if (!frm.is_dirty()){
+         //frappe.msgprint(__('No modifications made to save.'));
+         // Styled screen corner notification toast
+         frappe.show_alert({
+            message: __('No changes in the document.'),
+            indicator: 'warning' // Options: 'info', 'success', 'warning', 'danger'
+         });
+         return;
+      }
       if (!frm.doc.date) {
          frappe.msgprint(__('Please select Overtime Date.'));
          return;
@@ -46,25 +55,46 @@ frappe.ui.form.on("Employee Overtime Tool", {
          frappe.msgprint(__('No employee records available to submit.'));
          return;
       }
-
-      frappe.call({
-         method: "vbint.vbint.employee_overtime_tool_api.save_overtime_records",
-         args: {
-            date: frm.doc.date,
-            company: frm.doc.company,
-            rows: frm.doc.employees
-         },
-         freeze: true,
-         callback: function (r) {
-            if (r.message === "Success") {
-               frappe.show_alert({ message: __('Overtime data processed successfully!'), indicator: 'green' });
-               frm.trigger('fetch_employees');
-            } else {
-               frappe.show_alert({ message: __('Error saving Overtime data.'), indicator: 'red' });
-               frappe.set_route('List', frm.doctype);
+      if (frm.is_new()) {
+         frappe.call({
+            method: "vbint.vbint.employee_overtime_tool_api.create_overtime_record",
+            args: {
+               date: frm.doc.date,
+               company: frm.doc.company,
+               rows: frm.doc.employees
+            },
+            freeze: true,
+            callback: function (r) {
+               if (r.message === "Success") {
+                  frm.dirty(0);
+                  frappe.show_alert({ message: __('Overtime data processed successfully!'), indicator: 'green' });
+                  frappe.set_route('List', frm.doctype);
+               } else {
+                  frappe.show_alert({ message: __('Error saving Overtime data.'), indicator: 'red' });
+               }
             }
-         }
-      });
+         });
+      } else {
+         frappe.call({
+            method: "vbint.vbint.employee_overtime_tool_api.update_overtime_record",
+            args: {
+               name: frm.doc.name,
+               date: frm.doc.date,
+               company: frm.doc.company,
+               rows: frm.doc.employees
+            },
+            freeze: true,
+            callback: function (r) {
+               if (r.message === "Success") {
+                  frm.dirty(0);
+                  frappe.show_alert({ message: __('Overtime data processed successfully!'), indicator: 'green' });
+                  frappe.set_route('List', frm.doctype);
+               } else {
+                  frappe.show_alert({ message: __('Error saving Overtime data.'), indicator: 'red' });
+               }
+            }
+         });
+      }
    }
 });
 

@@ -105,32 +105,62 @@ def get_employees_for_child_table(doctype, txt, searchfield, start, page_len, fi
 
 
 @frappe.whitelist()
-def save_overtime_records(date, company, rows):
+def create_overtime_record(date, company, rows):
    # Rows are received automatically as strings/dicts depending on submission format
    records = json.loads(rows) if isinstance(rows, str) else rows
    if not isinstance(records, list):
       return "Failure"
 
-   for row in records:
-      log.info("row = " + str(row))
-      '''
-      if row.get("attendance_record"):
-         # Update status on existing attendance document entry fields
-         frappe.db.set_value(
-            "Attendance", row["attendance_record"], "status", row["status"])
-      else:
-         # Create a brand new submitted system attendance record
-         doc = frappe.get_doc(
-            {
-               "doctype": "Attendance",
-               "employee": row["employee"],
-               "attendance_date": date,
-               "status": row["status"],
-               "company": company
-            }
-         )
-         #doc.insert()
-         #doc.submit()
-      '''
+   new_doc = frappe.new_doc("Employee Overtime Tool")
+   new_doc.date = date
+   new_doc.company = company
+
+   # Iterate and append rows to the child table fieldname
+   for emp in records:
+      log.info("emp = " + str(emp))
+      row = new_doc.append("employees", {})
+      row.employee = emp.get("employee")
+      row.employee_name = emp.get("employee_name")
+      row.othours = emp.get("othours")
+      
+   new_doc.insert()
 
    return "Success"
+
+@frappe.whitelist()
+def update_overtime_record(name, date, company, rows):
+   # Rows are received automatically as strings/dicts depending on submission format
+   try:
+      records = json.loads(rows) if isinstance(rows, str) else rows
+      if not isinstance(records, list):
+         return "Failure"
+
+      ex_doc = frappe.get_doc("Employee Overtime Tool", name)
+      log.info("ex_doc = " + str(ex_doc))
+      frappe.db.delete("Employee Overtime Tool Item", {"parent": name})
+      # Iterate and append rows to the child table fieldname
+      for emp in records:
+         log.info("emp = " + str(emp))
+         row = ex_doc.append("employees", {})
+         row.employee = emp.get("employee")
+         row.employee_name = emp.get("employee_name")
+         row.othours = emp.get("othours")
+      ex_doc.save()
+      return "Success"
+   except Exception as ex:
+      log.error("error", ex)
+      return "Failure"
+   '''
+      doc = frappe.get_doc("Custom Attendance Tool", "TOOL-2026-00001")
+
+      # Clean existing rows first if you want to overwrite
+      doc.clear_table("attendance_rows")
+
+      # Append new entries
+      row = doc.append("attendance_rows", {
+         "employee": "EMP-001",
+         "status": "Present"
+      })
+
+      doc.save() # Persists changes to database
+   '''

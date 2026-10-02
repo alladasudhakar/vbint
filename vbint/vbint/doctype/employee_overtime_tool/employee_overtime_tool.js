@@ -4,6 +4,18 @@
 //Define a global namespace to store your cached employee list
 frappe.provide('custom_cache');
 
+// 1. Force the field UI to display Name alongside ID after selection
+frappe.form.link_formatters['Employee'] = function (value, doc) {
+   // If the data is currently loading or empty, return default
+   if (!value) return "";
+
+   // Check if employee name exists in the current row context
+   if (doc && doc.employee_name) {
+      //return `${value} :: ${doc.employee_name}`;
+   }
+
+   return value;
+};
 
 frappe.ui.form.on("Employee Overtime Tool", {
    onload: function (frm) {
@@ -34,7 +46,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
    },
 
    save_overtime: function (frm) {
-      if (!frm.is_dirty()){
+      if (!frm.is_dirty()) {
          //frappe.msgprint(__('No modifications made to save.'));
          // Styled screen corner notification toast
          frappe.show_alert({
@@ -116,7 +128,16 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
       if (row.employee) {
          const targetEmployee = custom_cache.employees.find(emp => emp.name === row.employee);
          if (targetEmployee) {
-            frappe.model.set_value(cdt, cdn, 'employee_name', targetEmployee.employee_name);
+            let empName = targetEmployee.employee_name;
+            if(empName) {
+               //remove leading/trailing spaces
+               empName = empName.trim();
+               // Replaces any sequence of 2 or more spaces with 1 space
+               empName = empName.replace(/ +/g, " ");
+            } else {
+               empName = "";
+            }
+            frappe.model.set_value(cdt, cdn, 'employee_name', empName);
          } else {
             frappe.model.set_value(cdt, cdn, 'employee_name', '');
          }

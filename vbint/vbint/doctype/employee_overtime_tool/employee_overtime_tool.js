@@ -126,10 +126,11 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
    employee: function (frm, cdt, cdn) {
       let row = locals[cdt][cdn];
       if (row.employee) {
+         //fetch employee data from cache
          const targetEmployee = custom_cache.employees.find(emp => emp.name === row.employee);
          if (targetEmployee) {
             let empName = targetEmployee.employee_name;
-            if(empName) {
+            if (empName) {
                //remove leading/trailing spaces
                empName = empName.trim();
                // Replaces any sequence of 2 or more spaces with 1 space
@@ -141,7 +142,9 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          } else {
             frappe.model.set_value(cdt, cdn, 'employee_name', '');
          }
-         /*frappe.db.get_value('Employee', row.employee, 'employee_name', (r) => {
+         /*
+         //Fetch employee data from database directly (which requires Employee permission)
+         frappe.db.get_value('Employee', row.employee, 'employee_name', (r) => {
             if (r && r.employee_name) {
                frappe.model.set_value(cdt, cdn, 'employee_name', r.employee_name);
             }
@@ -167,7 +170,6 @@ function fetch_and_cache_employees(frm) {
          if (r.message) {
             // Cache the clean list of dicts directly in memory
             custom_cache.employees = r.message;
-            console.log("r.message = " + JSON.stringify(r.message));
          }
          //frappe.msgprint(__('fetch_and_cache_employees() ' + custom_cache.employees));
       }

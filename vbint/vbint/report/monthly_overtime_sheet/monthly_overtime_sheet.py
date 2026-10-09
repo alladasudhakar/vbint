@@ -80,7 +80,7 @@ def execute(filters: Filters | None = None) -> tuple:
          filters.start_date = stDt.strftime("%Y-%m-%d")
          filters.end_date = enDt.strftime("%Y-%m-%d")
       '''
-   filters.summarized_view = True
+
    print("after filters = " + str(filters))
 
    attendance_map = get_attendance_map(filters)
@@ -144,6 +144,7 @@ def updateDateRange(filters: Filters | None = None) -> Filters:
    print("updateDateRange() returning filters = " + str(filters))
    return filters
 
+
 def get_message() -> str:
    message = ""
    colors = [
@@ -174,85 +175,89 @@ def get_columns(filters: Filters) -> list[dict]:
 
    if filters.group_by:
       options_mapping = {
-          "Branch": "Branch",
-          "Grade": "Employee Grade",
-          "Department": "Department",
-          "Designation": "Designation",
+         "Branch": "Branch",
+         "Grade": "Employee Grade",
+         "Department": "Department",
+         "Designation": "Designation",
       }
       options = options_mapping.get(filters.group_by)
       columns.append(
-          {
-              "label": _(filters.group_by),
-              "fieldname": frappe.scrub(filters.group_by),
-              "fieldtype": "Link",
-              "options": options,
-              "width": 120,
-          }
+         {
+            "label": _(filters.group_by),
+            "fieldname": frappe.scrub(filters.group_by),
+            "fieldtype": "Link",
+            "options": options,
+            "width": 120,
+         }
       )
 
    columns.extend(
-       [
-           {
-               "label": _("Employee"),
-               "fieldname": "employee",
-               "fieldtype": "Link",
-               "options": "Employee",
-               "width": 135,
-           },
-           {"label": _("Employee Name"), "fieldname": "employee_name",
-            "fieldtype": "Data", "width": 120},
-       ]
+      [
+         {
+            "label": _("Employee"),
+            "fieldname": "employee",
+            "fieldtype": "Link",
+            "options": "Employee",
+            "width": 135,
+         },
+         {
+            "label": _("Employee Name"),
+            "fieldname": "employee_name",
+            "fieldtype": "Data",
+            "width": 120
+         },
+      ]
    )
 
    if filters.summarized_view:
       columns.extend(
-          [
-              {
-                  "label": _("Total Present"),
-                  "fieldname": "total_present",
-                  "fieldtype": "Float",
-                  "width": 120,
-               },
-              {"label": _("Total Leaves"), "fieldname": "total_leaves",
-               "fieldtype": "Float", "width": 110},
-              {"label": _("Total Absent"), "fieldname": "total_absent",
-               "fieldtype": "Float", "width": 110},
-              {
-                  "label": _("Total Holidays"),
-                  "fieldname": "total_holidays",
-                  "fieldtype": "Float",
-                  "width": 120,
-               },
-              {
-                  "label": _("Total Overtime"),
-                  "fieldname": "otdays",
-                  "fieldtype": "Float",
-                  "width": 125,
-               },
-              {
-                  "label": _("Unmarked Days"),
-                  "fieldname": "unmarked_days",
-                  "fieldtype": "Float",
-                  "width": 130,
-               },
-          ]
+         [
+            {
+               "label": _("Total Present"),
+               "fieldname": "total_present",
+               "fieldtype": "Float",
+               "width": 120,
+            },
+            {"label": _("Total Leaves"), "fieldname": "total_leaves",
+             "fieldtype": "Float", "width": 110},
+            {"label": _("Total Absent"), "fieldname": "total_absent",
+             "fieldtype": "Float", "width": 110},
+            {
+               "label": _("Total Holidays"),
+               "fieldname": "total_holidays",
+               "fieldtype": "Float",
+               "width": 120,
+            },
+            {
+               "label": _("Total Overtime"),
+               "fieldname": "otdays",
+               "fieldtype": "Float",
+               "width": 125,
+            },
+            {
+               "label": _("Unmarked Days"),
+               "fieldname": "unmarked_days",
+               "fieldtype": "Float",
+               "width": 130,
+            },
+         ]
       )
       columns.extend(get_columns_for_leave_types())
       columns.extend(
-          [
-              {
-                  "label": _("Total Late Entries"),
-                  "fieldname": "total_late_entries",
-                  "fieldtype": "Float",
-                  "width": 140,
-              },
-              {
-                  "label": _("Total Early Exits"),
-                  "fieldname": "total_early_exits",
-                  "fieldtype": "Float",
-                  "width": 140,
-              },
-          ]
+         [
+            {
+               "label": _("Total Late Entries"),
+               "fieldname": "total_late_entries",
+               "fieldtype": "Float",
+               "width": 140,
+            },
+            {
+               "label": _("Total Early Exits"),
+               "fieldname": "total_early_exits",
+               "fieldtype": "Float",
+               "width": 140,
+            },
+         ]
       )
    else:
       columns.append({"label": _("Shift"), "fieldname": "shift",
@@ -640,6 +645,14 @@ def get_rows(
    overtime_map = get_overtime_records(filters)
    for employee, details in employee_details.items():
       holidays = employee_holiday_map.get(employee, [])
+      otRecs = overtime_map.get(employee, [])
+      otValMap = {}
+      for overtRec in otRecs:
+         dateKey = overtRec['date'].strftime("%d-%m-%Y")
+         print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
+         otValMap[dateKey] = overtRec['othours']
+         #for key, value in overtRec.items():
+         #   print(f"otRecs Key: {key} -> otRecs Value: {value}")
 
       if filters.summarized_view:
          attendance = get_attendance_status_for_summarized_view(
@@ -647,7 +660,7 @@ def get_rows(
          )
          if not attendance:
             continue
-         otRecs = overtime_map.get(employee, [])
+
          otHours = 0
          for ot in otRecs:
             # items_map[ot.employee].append(ot)
@@ -676,9 +689,18 @@ def get_rows(
          )
          # set employee details in the first row
          for record in attendance_for_employee:
+            print("otRecs for " + str(employee) + " = " + str(otRecs))
+            print("detailed_view partial rec = " + str(record))
+            for key, value in record.items():
+               print(f"Key: {key} -> Value: {value}")
+               if key in otValMap:
+                  print(f"overtime = {otValMap[key]}")
+                  record[key] = "<span style='color:blue'>"+str(otValMap[key])+"</span>"
+               else:
+                  record[key] = 0
             record.update(
                {"employee": employee, "employee_name": details.employee_name})
-            print(str(record))
+            print("detailed_view rec = " + str(record))
 
          records.extend(attendance_for_employee)
 

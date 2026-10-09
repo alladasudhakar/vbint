@@ -122,13 +122,13 @@ frappe.query_reports["Monthly Overtime Sheet"] = {
 			label: __("Include Company Descendants"),
 			fieldtype: "Check",
 			default: 1,
-		},
+		},*/
 		{
 			fieldname: "summarized_view",
 			label: __("Summarized View"),
 			fieldtype: "Check",
 			default: 0,
-		},*/
+		},
 	],
 	onload: function () {
 		frappe.dom.set_style(`
@@ -203,6 +203,11 @@ frappe.query_reports["Monthly Overtime Sheet"] = {
 				else if (value == "A") value = "<span style='color:red'>" + value + "</span>";
 				else if (value == "L") value = "<span style='color:#318AD8'>" + value + "</span>";
 				else value = "<span style='color:#878787'>" + value + "</span>";
+			}
+		}
+		else {
+			if (column.colIndex == 7){
+				value = "<span style='color:blue'>" + value + "</span>";
 			}
 		}
 

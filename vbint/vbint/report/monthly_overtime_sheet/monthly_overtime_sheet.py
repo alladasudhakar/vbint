@@ -70,16 +70,6 @@ def execute(filters: Filters | None = None) -> tuple:
    print("before filters = " + str(filters))
    if filters.filter_based_on == "Month" and (filters.month and filters.year):
       filters = updateDateRange(filters)
-      '''
-      if filters.month == str(1):
-         print("(27-Mar to 25-Apr)")
-         stDt = datetime.strptime("27-Mar-" + filters.year, "%d-%b-%Y")
-         enDt = datetime.strptime("25-Apr-" + filters.year, "%d-%b-%Y")
-         print(str(stDt) + " - " + str(enDt))
-         filters.filter_based_on = "Date Range"
-         filters.start_date = stDt.strftime("%Y-%m-%d")
-         filters.end_date = enDt.strftime("%Y-%m-%d")
-      '''
 
    print("after filters = " + str(filters))
 
@@ -449,8 +439,8 @@ def get_attendance_records(filters: Filters) -> list[dict]:
       if filters.branch:
          query = query.where(Employee.branch == filters.branch)
 
-   query = query.where(Attendance.employee_name.isin(
-      ["SIVA DUKKA", "LAKSHMI S"]))
+   #query = query.where(Attendance.employee_name.isin(
+   #   ["SIVA DUKKA", "LAKSHMI S"]))
    query = query.orderby(Attendance.employee, Attendance.attendance_date)
 
    return query.run(as_dict=1)
@@ -532,8 +522,8 @@ def get_employee_related_details(filters: Filters) -> tuple[dict, list]:
    if filters.branch:
       query = query.where(Employee.branch == filters.branch)
 
-   query = query.where(Employee.employee_name.isin(
-      ["SIVA DUKKA", "LAKSHMI S"]))
+   #query = query.where(Employee.employee_name.isin(
+   #   ["SIVA DUKKA", "LAKSHMI S"]))
    group_by = filters.group_by
    if group_by:
       group_by = group_by.lower()
@@ -678,8 +668,9 @@ def get_rows(
          row.update(leave_summary)
          row.update(entry_exits_summary)
          row.update({"otdays": otDays})
-         print("summ view row = " + str(row))
-         records.append(row)
+         if otDays > 0:
+            print("summ view row = " + str(row))
+            records.append(row)
       else:
          employee_attendance = attendance_map.get(employee)
          if not employee_attendance:
@@ -688,21 +679,25 @@ def get_rows(
              employee, filters, employee_attendance, holidays
          )
          # set employee details in the first row
-         for record in attendance_for_employee:
+         for attRec in attendance_for_employee:
             print("otRecs for " + str(employee) + " = " + str(otRecs))
-            print("detailed_view partial rec = " + str(record))
-            for key, value in record.items():
-               print(f"Key: {key} -> Value: {value}")
+            print("detailed_view partial rec = " + str(attRec))
+            otExists = False
+            for key, value in attRec.items():
+               #print(f"Key: {key} -> Value: {value}")
                if key in otValMap:
                   print(f"overtime = {otValMap[key]}")
-                  record[key] = "<span style='color:blue'>"+str(otValMap[key])+"</span>"
+                  attRec[key] = "<span style='color:blue'>"+str(otValMap[key])+"</span>"
+                  otExists = True
                else:
-                  record[key] = 0
-            record.update(
+                  attRec[key] = 0
+            attRec.update(
                {"employee": employee, "employee_name": details.employee_name})
-            print("detailed_view rec = " + str(record))
+            print("detailed_view rec = " + str(attRec))
+            if otExists:
+               records.append(attRec)
 
-         records.extend(attendance_for_employee)
+         #records.extend(attendance_for_employee)
 
    return records
 

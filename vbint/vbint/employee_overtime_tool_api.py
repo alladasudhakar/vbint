@@ -71,7 +71,7 @@ def get_employees_for_child_table(doctype, txt, searchfield, start, page_len, fi
             "Employee", fields=["name", "employee_name"],
             filters=filters, order_by="employee_name asc"
          )
-         log.info("cached_data employees = " + str(employees))
+
          results = []
          for emp in employees:
             # Check if attendance is already tracked for this specific day

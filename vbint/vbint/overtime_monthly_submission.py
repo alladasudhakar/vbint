@@ -7,42 +7,55 @@ log = frappe.logger("vbint", allow_site=True)
 log.setLevel("DEBUG")
 
 
-def getSubmitDay(month):
-   subDay = 0
-   if month in [1,3,5,7,8,10,12]:
-      subDay = 27
-   elif month in [4,6,9,11]:
-      subDay = 26
-   elif month in [2]:
-      subDay = 24
-   log.info("getSubmitDay (" + str(month) + ") = " + str(subDay))
-   return subDay
-
 def getDates(dTime: datetime):
    if dTime.month in [1]:
-      return str(dTime.year-1)+"-12-27 00:00:00", str(dTime.year)+"-01-26 23:59:59"
+      return (str(dTime.year - 1) + "-12-27 00:00:00",
+              str(dTime.year) + "-01-26 23:59:59",
+              str(dTime.year) + "-01-27", 31)
    elif dTime.month in [2]:
-      return str(dTime.year)+"-01-27 00:00:00", str(dTime.year)+"-02-23 23:59:59"
+      return (str(dTime.year) + "-01-27 00:00:00",
+              str(dTime.year) + "-02-23 23:59:59",
+              str(dTime.year) + "-02-24", 28)
    elif dTime.month in [3]:
-      return str(dTime.year)+"-02-24 00:00:00", str(dTime.year)+"-03-26 23:59:59"
+      return (str(dTime.year) + "-02-24 00:00:00",
+              str(dTime.year) + "-03-26 23:59:59",
+              str(dTime.year) + "-03-27", 31)
    elif dTime.month in [4]:
-      return str(dTime.year)+"-03-27 00:00:00", str(dTime.year)+"-04-25 23:59:59"
+      return (str(dTime.year) + "-03-27 00:00:00",
+              str(dTime.year) + "-04-25 23:59:59",
+              str(dTime.year) + "-04-26", 30)
    elif dTime.month in [5]:
-      return str(dTime.year)+"-04-26 00:00:00", str(dTime.year)+"-05-26 23:59:59"
+      return (str(dTime.year) + "-04-26 00:00:00",
+              str(dTime.year) + "-05-26 23:59:59",
+              str(dTime.year) + "-05-27", 31)
    elif dTime.month in [6]:
-      return str(dTime.year)+"-05-27 00:00:00", str(dTime.year)+"-06-25 23:59:59"
+      return (str(dTime.year) + "-05-27 00:00:00",
+              str(dTime.year) + "-06-25 23:59:59",
+              str(dTime.year) + "-06-26", 30)
    elif dTime.month in [7]:
-      return str(dTime.year)+"-06-26 00:00:00", str(dTime.year)+"-07-26 23:59:59"
+      return (str(dTime.year) + "-06-26 00:00:00",
+              str(dTime.year) + "-07-26 23:59:59",
+              str(dTime.year) + "-07-27", 31)
    elif dTime.month in [8]:
-      return str(dTime.year)+"-07-27 00:00:00", str(dTime.year)+"-08-26 23:59:59"
+      return (str(dTime.year) + "-07-27 00:00:00",
+              str(dTime.year) + "-08-26 23:59:59",
+              str(dTime.year) + "-08-27", 31)
    elif dTime.month in [9]:
-      return str(dTime.year)+"-08-27 00:00:00", str(dTime.year)+"-09-25 23:59:59"
+      return (str(dTime.year) + "-08-27 00:00:00",
+              str(dTime.year) + "-09-25 23:59:59",
+              str(dTime.year) + "-09-26", 30)
    elif dTime.month in [10]:
-      return str(dTime.year)+"-09-26 00:00:00", str(dTime.year)+"-10-26 23:59:59"
+      return (str(dTime.year) + "-09-26 00:00:00",
+              str(dTime.year) + "-10-26 23:59:59",
+              str(dTime.year) + "-10-27", 31)
    elif dTime.month in [11]:
-      return str(dTime.year)+"-10-27 00:00:00", str(dTime.year)+"-11-25 23:59:59"
+      return (str(dTime.year) + "-10-27 00:00:00",
+              str(dTime.year) + "-11-25 23:59:59",
+              str(dTime.year) + "-11-26", 30)
    elif dTime.month in [12]:
-         return str(dTime.year)+"-11-26 00:00:00", str(dTime.year)+"-12-26 23:59:59"
+      return (str(dTime.year) + "-11-26 00:00:00",
+              str(dTime.year) + "-12-26 23:59:59",
+              str(dTime.year) + "-12-27", 31)
    return None, None
 
 
@@ -55,18 +68,17 @@ def submit_monthly_overtime():
    #     return
    # now_datetime().month
 
-   
    log.info("\n\n **** submit_monthly_overtime() called " +
             str(now_datetime().month) + " **** \n\n")
-   sbmDay = getSubmitDay(now_datetime().month)
+
    n = 12
    for i in range(1, n + 1):
-      getSubmitDay(i)
       dates = getDates(datetime(2026,i,8))
       log.info("testing dates = " + str(dates))
 
    dates = getDates(now_datetime())
-   log.info("dates = " + str(dates))
+   log.info("fetching overtime records between dates = " +
+            dates[0] + " , " + dates[1])
    # Fetch all draft overtime logs
    records = frappe.get_all(
       "Employee Overtime Tool",
@@ -90,23 +102,26 @@ def submit_monthly_overtime():
          otHou += otMap[rec.employee]
       otMap[rec.employee] = otHou
    log.info("otMap = " + str(otMap))
+   log.info("payroll_date = " + dates[2])
+   log.info("no. of days = " + str(dates[3]))
    for key, value in otMap.items():
       log.info(f"otMap Key: {key} -> otMap Value: {value}")
 
       exists = frappe.db.exists("Vbond Overtime", {
          "employee": str(key),
-         "payroll_date": '2026-08-25'
+         "payroll_date": dates[2]
       })
       log.info("Vbond Overtime Record check = " + str(exists))
       if not exists:
          # Record exists
-         log.info("Vbond Overtime Record does not exists, creating Vbond Overtime document")
+         log.info(
+            "Vbond Overtime Record does not exists, creating Vbond Overtime document")
          doc = frappe.get_doc(
             {
                "doctype": "Vbond Overtime",
                "employee": key,
-               "payroll_date": '2026-08-25',
-               "working_days": 30,
+               "payroll_date": dates[2],
+               "working_days": dates[3],
                "overtime_days": round((value / 9), 2)
             }
          )

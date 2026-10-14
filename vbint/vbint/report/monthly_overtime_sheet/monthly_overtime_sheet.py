@@ -95,39 +95,46 @@ def execute(filters: Filters | None = None) -> tuple:
 
 def updateDateRange(filters: Filters | None = None) -> Filters:
 
+   stDt: datetime = None
+   enDt: datetime = None
    if filters.month == str(1):
       stDt = datetime.strptime("27-Mar-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("25-Apr-" + filters.year, "%d-%b-%Y")
-      filters['filter_based_on'] = "Date Range"
-      filters.start_date = stDt.strftime("%Y-%m-%d")
-      filters.end_date = enDt.strftime("%Y-%m-%d")
    elif filters.month == str(2):
       stDt = datetime.strptime("26-Apr-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("26-May-" + filters.year, "%d-%b-%Y")
-      filters['filter_based_on'] = "Date Range"
-      filters.start_date = stDt.strftime("%Y-%m-%d")
-      filters.end_date = enDt.strftime("%Y-%m-%d")
    elif filters.month == str(3):
       stDt = datetime.strptime("27-May-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("25-Jun-" + filters.year, "%d-%b-%Y")
-      filters['filter_based_on'] = "Date Range"
-      filters.start_date = stDt.strftime("%Y-%m-%d")
-      filters.end_date = enDt.strftime("%Y-%m-%d")
    elif filters.month == str(4):
       stDt = datetime.strptime("26-Jun-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("26-Jul-" + filters.year, "%d-%b-%Y")
-      filters['filter_based_on'] = "Date Range"
-      filters.start_date = stDt.strftime("%Y-%m-%d")
-      filters.end_date = enDt.strftime("%Y-%m-%d")
    elif filters.month == str(5):
       stDt = datetime.strptime("27-Jul-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("26-Aug-" + filters.year, "%d-%b-%Y")
-      filters['filter_based_on'] = "Date Range"
-      filters.start_date = stDt.strftime("%Y-%m-%d")
-      filters.end_date = enDt.strftime("%Y-%m-%d")
    elif filters.month == str(6):
       stDt = datetime.strptime("26-Aug-" + filters.year, "%d-%b-%Y")
       enDt = datetime.strptime("25-Sep-" + filters.year, "%d-%b-%Y")
+   elif filters.month == str(7):
+      stDt = datetime.strptime("26-Sep-" + filters.year, "%d-%b-%Y")
+      enDt = datetime.strptime("26-Oct-" + filters.year, "%d-%b-%Y")
+   elif filters.month == str(8):
+      stDt = datetime.strptime("27-Oct-" + filters.year, "%d-%b-%Y")
+      enDt = datetime.strptime("25-Nov-" + filters.year, "%d-%b-%Y")
+   elif filters.month == str(9):
+      stDt = datetime.strptime("26-Nov-" + filters.year, "%d-%b-%Y")
+      enDt = datetime.strptime("26-Dec-" + filters.year, "%d-%b-%Y")
+   elif filters.month == str(10):
+      stDt = datetime.strptime("27-Dec-" + filters.year, "%d-%b-%Y")
+      enDt = datetime.strptime("26-Jan-" + (filters.year+1), "%d-%b-%Y")
+   elif filters.month == str(11):
+      stDt = datetime.strptime("27-Jan-" + (filters.year+1), "%d-%b-%Y")
+      enDt = datetime.strptime("23-Feb-" + (filters.year+1), "%d-%b-%Y")
+   elif filters.month == str(12):
+      stDt = datetime.strptime("24-Feb-" + (filters.year+1), "%d-%b-%Y")
+      enDt = datetime.strptime("26-Mar-" + (filters.year+1), "%d-%b-%Y")
+
+   if stDt and enDt:
       filters['filter_based_on'] = "Date Range"
       filters.start_date = stDt.strftime("%Y-%m-%d")
       filters.end_date = enDt.strftime("%Y-%m-%d")

@@ -126,13 +126,13 @@ def updateDateRange(filters: Filters | None = None) -> Filters:
       enDt = datetime.strptime("26-Dec-" + filters.year, "%d-%b-%Y")
    elif filters.month == str(10):
       stDt = datetime.strptime("27-Dec-" + filters.year, "%d-%b-%Y")
-      enDt = datetime.strptime("26-Jan-" + (filters.year+1), "%d-%b-%Y")
+      enDt = datetime.strptime("26-Jan-" + str(int(filters.year)+1), "%d-%b-%Y")
    elif filters.month == str(11):
-      stDt = datetime.strptime("27-Jan-" + (filters.year+1), "%d-%b-%Y")
-      enDt = datetime.strptime("23-Feb-" + (filters.year+1), "%d-%b-%Y")
+      stDt = datetime.strptime("27-Jan-" + str(int(filters.year)+1), "%d-%b-%Y")
+      enDt = datetime.strptime("23-Feb-" + str(int(filters.year)+1), "%d-%b-%Y")
    elif filters.month == str(12):
-      stDt = datetime.strptime("24-Feb-" + (filters.year+1), "%d-%b-%Y")
-      enDt = datetime.strptime("26-Mar-" + (filters.year+1), "%d-%b-%Y")
+      stDt = datetime.strptime("24-Feb-" + str(int(filters.year)+1), "%d-%b-%Y")
+      enDt = datetime.strptime("26-Mar-" + str(int(filters.year)+1), "%d-%b-%Y")
 
    if stDt and enDt:
       filters['filter_based_on'] = "Date Range"

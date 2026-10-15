@@ -153,23 +153,31 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"vbint.tasks.all"
-# 	],
-# 	"daily": [
-# 		"vbint.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"vbint.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"vbint.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"vbint.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+   # "cron": {
+   #    "*/10 * * * *": [
+   #       "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
+   #    ]
+   # },
+   "hourly": [
+      "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
+   ],
+   # 	"all": [
+   # 		"vbint.tasks.all"
+   # 	],
+   # 	"daily": [
+   # 		"vbint.tasks.daily"
+   # 	],
+   # 	"hourly": [
+   # 		"vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
+   # 	],
+   # 	"weekly": [
+   # 		"vbint.tasks.weekly"
+   # 	],
+   # 	"monthly": [
+   # 		"vbint.tasks.monthly"
+   # 	],
+}
 
 # Testing
 # -------

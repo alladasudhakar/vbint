@@ -27,6 +27,9 @@ from hrms.utils.holiday_list import (
 
 Filters = frappe._dict
 
+log = frappe.logger("vbint", allow_site=True)
+log.setLevel("DEBUG")
+
 status_map = {
    "Present": "P",
    "Absent": "A",
@@ -67,11 +70,11 @@ def execute(filters: Filters | None = None) -> tuple:
          filters.companies.extend(
             get_descendants_of("Company", filters.company))
 
-   print("before filters = " + str(filters))
+   log.info("before filters = " + str(filters))
    if filters.filter_based_on == "Month" and (filters.month and filters.year):
       filters = updateDateRange(filters)
 
-   print("after filters = " + str(filters))
+   log.info("after filters = " + str(filters))
 
    attendance_map = get_attendance_map(filters)
    if not attendance_map:
@@ -126,13 +129,18 @@ def updateDateRange(filters: Filters | None = None) -> Filters:
       enDt = datetime.strptime("26-Dec-" + filters.year, "%d-%b-%Y")
    elif filters.month == str(10):
       stDt = datetime.strptime("27-Dec-" + filters.year, "%d-%b-%Y")
-      enDt = datetime.strptime("26-Jan-" + (filters.year+1), "%d-%b-%Y")
+      enDt = datetime.strptime(
+         "26-Jan-" + str(int(filters.year) + 1), "%d-%b-%Y")
    elif filters.month == str(11):
-      stDt = datetime.strptime("27-Jan-" + (filters.year+1), "%d-%b-%Y")
-      enDt = datetime.strptime("23-Feb-" + (filters.year+1), "%d-%b-%Y")
+      stDt = datetime.strptime(
+         "27-Jan-" + str(int(filters.year) + 1), "%d-%b-%Y")
+      enDt = datetime.strptime(
+         "23-Feb-" + str(int(filters.year) + 1), "%d-%b-%Y")
    elif filters.month == str(12):
-      stDt = datetime.strptime("24-Feb-" + (filters.year+1), "%d-%b-%Y")
-      enDt = datetime.strptime("26-Mar-" + (filters.year+1), "%d-%b-%Y")
+      stDt = datetime.strptime(
+         "24-Feb-" + str(int(filters.year) + 1), "%d-%b-%Y")
+      enDt = datetime.strptime(
+         "26-Mar-" + str(int(filters.year) + 1), "%d-%b-%Y")
 
    if stDt and enDt:
       filters['filter_based_on'] = "Date Range"
@@ -367,9 +375,9 @@ def get_attendance_map(filters: Filters) -> dict:
        }
    }
    """
-   print("get_attendance_map() filters = " + str(filters))
+   log.info("get_attendance_map() filters = " + str(filters))
    attendance_list = get_attendance_records(filters)
-   print("attendance_list = " + str(attendance_list))
+   log.info("attendance_list len = " + str(len(attendance_list)))
    # overtime_list = get_overtime_records(filters)
    attendance_map = {}
    leave_map = {}
@@ -446,7 +454,7 @@ def get_attendance_records(filters: Filters) -> list[dict]:
       if filters.branch:
          query = query.where(Employee.branch == filters.branch)
 
-   #query = query.where(Attendance.employee_name.isin(
+   # query = query.where(Attendance.employee_name.isin(
    #   ["SIVA DUKKA", "LAKSHMI S"]))
    query = query.orderby(Attendance.employee, Attendance.attendance_date)
 
@@ -454,12 +462,12 @@ def get_attendance_records(filters: Filters) -> list[dict]:
 
 
 def get_overtime_records(filters: Filters) -> list[dict]:
-   print("\n get_overtime_records : filters = " + str(filters))
+   log.info("\n get_overtime_records : filters = " + str(filters))
    ot_tool = frappe.qb.DocType("Employee Overtime Tool")
    ot_tool_item = frappe.qb.DocType("Employee Overtime Tool Item")
    attendance_date_condition = get_date_condition(
        ot_tool.date, filters)
-   print("attendance_date_condition = " + str(attendance_date_condition))
+   log.info("attendance_date_condition = " + str(attendance_date_condition))
    query = (
       frappe.qb.from_(ot_tool_item)
       .inner_join(ot_tool)
@@ -474,7 +482,7 @@ def get_overtime_records(filters: Filters) -> list[dict]:
       .where(ot_tool_item.parenttype == "Employee Overtime Tool")
    )
    otRecs = query.run(as_dict=True)
-   print("otRecs = " + str(otRecs))
+   #log.info("otRecs = " + str(otRecs))
    # Maps items to the employee
    # items_map = {ot['employee']: ot for ot in items}
    # Initialize a defaultdict with a list factory
@@ -485,7 +493,7 @@ def get_overtime_records(filters: Filters) -> list[dict]:
       # items_map[ot.employee].append(ot)
       # value = {"othours": ot.othours, "date": ot.date}
       otRecs_map[ot.employee].append(ot)
-   print("otRecs_map = " + str(dict(otRecs_map)))
+   print("otRecs_map = " + str(len(dict(otRecs_map))))
    return dict(otRecs_map)
 
 
@@ -529,7 +537,7 @@ def get_employee_related_details(filters: Filters) -> tuple[dict, list]:
    if filters.branch:
       query = query.where(Employee.branch == filters.branch)
 
-   #query = query.where(Employee.employee_name.isin(
+   # query = query.where(Employee.employee_name.isin(
    #   ["SIVA DUKKA", "LAKSHMI S"]))
    group_by = filters.group_by
    if group_by:
@@ -648,7 +656,7 @@ def get_rows(
          dateKey = overtRec['date'].strftime("%d-%m-%Y")
          print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
          otValMap[dateKey] = overtRec['othours']
-         #for key, value in overtRec.items():
+         # for key, value in overtRec.items():
          #   print(f"otRecs Key: {key} -> otRecs Value: {value}")
 
       if filters.summarized_view:
@@ -664,7 +672,7 @@ def get_rows(
             # value = {"othours": ot.othours, "date": ot.date}
             otHours += ot.othours
          otDays = round(otHours / 9, 2) if otHours > 0 else 0
-         print(str(employee) + " : otDays = " + str(otDays))
+         log.info(str(employee) + " : otDays = " + str(otDays))
 
          leave_summary = get_leave_summary(employee, filters)
          entry_exits_summary = get_entry_exits_summary(employee, filters)
@@ -676,7 +684,7 @@ def get_rows(
          row.update(entry_exits_summary)
          row.update({"otdays": otDays})
          if otDays > 0:
-            print("summ view row = " + str(row))
+            log.info("summ view row = " + str(row))
             records.append(row)
       else:
          employee_attendance = attendance_map.get(employee)
@@ -687,24 +695,25 @@ def get_rows(
          )
          # set employee details in the first row
          for attRec in attendance_for_employee:
-            print("otRecs for " + str(employee) + " = " + str(otRecs))
-            print("detailed_view partial rec = " + str(attRec))
+            log.info("otRecs for " + str(employee) + " = " + str(otRecs))
+            log.info("detailed_view partial rec = " + str(attRec))
             otExists = False
             for key, value in attRec.items():
-               #print(f"Key: {key} -> Value: {value}")
+               # print(f"Key: {key} -> Value: {value}")
                if key in otValMap:
-                  print(f"overtime = {otValMap[key]}")
-                  attRec[key] = "<span style='color:blue'>"+str(otValMap[key])+"</span>"
+                  log.info(f"overtime = {otValMap[key]}")
+                  attRec[key] = "<span style='color:blue'>" + \
+                      str(otValMap[key]) + "</span>"
                   otExists = True
                else:
                   attRec[key] = 0
             attRec.update(
                {"employee": employee, "employee_name": details.employee_name})
-            print("detailed_view rec = " + str(attRec))
+            log.info("detailed_view rec = " + str(attRec))
             if otExists:
                records.append(attRec)
 
-         #records.extend(attendance_for_employee)
+         # records.extend(attendance_for_employee)
 
    return records
 

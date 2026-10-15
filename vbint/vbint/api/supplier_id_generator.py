@@ -36,6 +36,17 @@ def update_supplier_id(doc, method):
    # 1. Convert the Frappe Document object into a standard Python dictionary
    doc_dict = doc.as_dict()
    log.info("update_supplier_id details - " + str(doc_dict))
+   log.info("update_supplier_id gstin - " + str(doc.gstin))
+   log.info("update_supplier_id supplier_group - " + str(doc.supplier_group))
+   spgSplits = str(doc.supplier_group).split("-")
+   if len(spgSplits) > 0:
+      log.info("spgSplits[0] - " + spgSplits[0])
+   # 2. Generate the new ID based on your region logic
+   if doc.gstin is not None and doc.supplier_group is not None:
+      gst_prefix = doc.gstin.upper()[:2]
+      naming_series_format = f"{gst_prefix}-.YYYY.-.#####"
+      new_name = make_autoname(naming_series_format)
+      log.info("update_supplier_id new_name - " + str(new_name))
    '''
    # Check if the region field was modified during this save action
    if doc.custom_region != db_doc.custom_region:

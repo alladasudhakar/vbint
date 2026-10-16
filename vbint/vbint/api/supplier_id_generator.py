@@ -9,8 +9,10 @@ log.setLevel("DEBUG")
 @frappe.whitelist()
 def generate_supplier_id(doc, method):
    # 1. Fallback if no region is selected
-   if not doc.custom_region:
-      frappe.throw("Please select a Region before saving the Supplier.")
+   # if not doc.custom_region:
+   #   frappe.throw("Please select a Region before saving the Supplier.")
+   if not doc.supplier_group:
+      frappe.throw("Please select a Supplier Group.")
    log.info("generate_supplier_id details - " + str(doc))
    # 2. Clean the region string to use as a prefix (e.g., "North America" -> "NA")
    # Alternatively, store an abbreviation field inside your Region DocType and fetch it here.
@@ -31,8 +33,6 @@ def update_supplier_id(doc, method):
    if doc.is_new():
       return
 
-   # 2. Fetch the pristine, unaltered document from the database to compare
-   db_doc = frappe.get_doc("Supplier", doc.name)
    # 1. Convert the Frappe Document object into a standard Python dictionary
    doc_dict = doc.as_dict()
    log.info("update_supplier_id details - " + str(doc_dict))
@@ -41,41 +41,53 @@ def update_supplier_id(doc, method):
    spgSplits = str(doc.supplier_group).split("-")
    if len(spgSplits) > 0:
       log.info("spgSplits[0] - " + spgSplits[0])
-   # 2. Generate the new ID based on your region logic
+   # 2. Determine your intended structural Primary Key ID 
    if doc.gstin is not None and doc.supplier_group is not None:
       gst_prefix = doc.gstin.upper()[:2]
-      naming_series_format = f"{gst_prefix}-.YYYY.-.#####"
-      new_name = make_autoname(naming_series_format)
-      log.info("update_supplier_id new_name - " + str(new_name))
-   '''
-   # Check if the region field was modified during this save action
-   if doc.custom_region != db_doc.custom_region:
-      if not doc.custom_region:
-         frappe.throw("Region cannot be empty. Please select a valid Region.")
-
-      # 3. Generate the new ID format based on the updated region
-      region_prefix = doc.custom_region.upper()[:3]
-      naming_series_format = f"{region_prefix}-.YYYY.-.#####"
-      new_name = make_autoname(naming_series_format)
-
-      # 4. Safely trigger the system-wide database rename
-      # Enclose in a try-except block to gracefully handle failures (like duplicate names)
+      sg_start = doc.supplier_group.upper()[:2]
+      sg_prefix = ""
+      if sg_start == "RM":
+         sg_prefix = "10"
+      elif sg_start == "PM":
+         sg_prefix = "20"
+      elif sg_start == "FG":
+         sg_prefix = "30"
+      else:
+         sg_prefix = "00"
+      naming_series_format = f"{gst_prefix}{sg_prefix}.#####"
+      newSupName = make_autoname(naming_series_format)
+      log.info("update_supplier_id new_name - " +
+               str(newSupName) + " -- doc.name = " + doc.name)
+      #3. Preserve the actual Supplier Name exactly as it stands
+      original_supplier_name = doc.supplier_name
+      original_supplier_name = 'AAGROW TEK COATING PRODUCTS'
       try:
-         old_name = doc.name
-
-         # frappe.rename_doc updates all child/foreign keys and reloads the doc instance
-         new_doc_name = frappe.rename_doc(
-            "Supplier", old_name, new_name, force=True)
-
-         # Update the current in-memory execution context so ERPNext doesn't look for the old name
-         doc.name = new_doc_name
-
-         frappe.msgprint(
-            f"Supplier ID successfully updated from {old_name} to {new_doc_name} due to region modification.")
+         if doc.name != newSupName:
+            # 4. Fire the deferred structural rename against the unique ID
+            frappe.enqueue(
+               "frappe.model.rename_doc.rename_doc",
+               doctype="Supplier",
+               old=doc.name,
+               new=newSupName,
+               enqueue_after_commit=True,  # Delays background queue processing safely
+               force=True,                 # Bypasses typical validation blockers
+               ignore_permissions=True     # CRITICAL FIX 2: Ignores system user role constraints
+            )
+            # 3. CRITICAL: Immediately after committing the rename task block, 
+            # force-override the supplier_name field back to its original value.
+            # This breaks Frappe's default behavior of syncing name -> supplier_name.
+            frappe.db.set_value(
+                  "Supplier", 
+                  newSupName, 
+                  "supplier_name", 
+                  original_supplier_name
+            )
+            log.info(f"after frappe.enqueue with parameters")
+         return f"Successfully renamed {doc.name} to {newSupName}."
 
       except Exception as e:
-         frappe.log_error(title="Supplier Dynamic Rename Failed",
+         frappe.log_error(title="Rename Doc Error",
                           message=frappe.get_traceback())
-         frappe.throw(
-            f"Could not automatically update Supplier ID code. Error: {str(e)}")
-   '''
+         log.info(f"rename failed.")
+         frappe.throw("Failed to rename document.")
+

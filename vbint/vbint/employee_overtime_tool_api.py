@@ -112,7 +112,7 @@ def create_overtime_record(date, company, rows):
       return "Failure"
 
    new_doc = frappe.new_doc("Employee Overtime Tool")
-   new_doc.date = date
+   new_doc.ot_date = date
    new_doc.company = company
 
    # Iterate and append rows to the child table fieldname

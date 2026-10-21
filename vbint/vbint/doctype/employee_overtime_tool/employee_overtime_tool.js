@@ -20,14 +20,14 @@ frappe.form.link_formatters['Employee'] = function (value, doc) {
 frappe.ui.form.on("Employee Overtime Tool", {
    onload: function (frm) {
       // Set date to today only if it's a new document and currently empty
-      if (frm.is_new() && !frm.doc.date) {
-         frm.set_value('date', frappe.datetime.get_today());
+      if (frm.is_new() && !frm.doc.ot_date) {
+         frm.set_value('ot_date', frappe.datetime.get_today());
       }
    },
 
    refresh: function (frm) {
-      if (frm.is_new() && !frm.doc.date) {
-         frm.set_value('date', frappe.datetime.get_today());
+      if (frm.is_new() && !frm.doc.ot_date) {
+         frm.set_value('ot_date', frappe.datetime.get_today());
       }
       fetch_and_cache_employees(frm);
 
@@ -40,7 +40,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
       }, 'tick');
 
       // Auto-fetch when fields change
-      frm.fields_dict['date'].df.change = () => frm.trigger('fetch_and_cache_employees');
+      frm.fields_dict['ot_date'].df.change = () => frm.trigger('fetch_and_cache_employees');
       frm.fields_dict['company'].df.change = () => frm.trigger('fetch_and_cache_employees');
       frm.fields_dict['department'].df.change = () => frm.trigger('fetch_and_cache_employees');
    },
@@ -55,7 +55,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
          });
          return;
       }
-      if (!frm.doc.date) {
+      if (!frm.doc.ot_date) {
          frappe.msgprint(__('Please select Overtime Date.'));
          return;
       }
@@ -71,7 +71,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
          frappe.call({
             method: "vbint.vbint.employee_overtime_tool_api.create_overtime_record",
             args: {
-               date: frm.doc.date,
+               date: frm.doc.ot_date,
                company: frm.doc.company,
                rows: frm.doc.employees
             },
@@ -91,7 +91,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
             method: "vbint.vbint.employee_overtime_tool_api.update_overtime_record",
             args: {
                name: frm.doc.name,
-               date: frm.doc.date,
+               date: frm.doc.ot_date,
                company: frm.doc.company,
                rows: frm.doc.employees
             },
@@ -161,7 +161,7 @@ function fetch_and_cache_employees(frm) {
    frappe.call({
       method: "vbint.vbint.employee_overtime_tool_api.get_employees_for_tool", // Route to Python backend method
       args: {
-         date: frm.doc.date,
+         date: frm.doc.ot_date,
          company: frm.doc.company,
          department: frm.doc.department,
          shift: frm.doc.shift

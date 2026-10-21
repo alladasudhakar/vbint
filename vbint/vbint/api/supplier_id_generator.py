@@ -41,7 +41,7 @@ def update_supplier_id(doc, method):
    spgSplits = str(doc.supplier_group).split("-")
    if len(spgSplits) > 0:
       log.info("spgSplits[0] - " + spgSplits[0])
-   # 2. Determine your intended structural Primary Key ID 
+   # 2. Determine your intended structural Primary Key ID
    if doc.gstin is not None and doc.supplier_group is not None:
       gst_prefix = doc.gstin.upper()[:2]
       sg_start = doc.supplier_group.upper()[:2]
@@ -54,36 +54,26 @@ def update_supplier_id(doc, method):
          sg_prefix = "30"
       else:
          sg_prefix = "00"
-      naming_series_format = f"{gst_prefix}{sg_prefix}.#####"
-      newSupName = make_autoname(naming_series_format)
-      log.info("update_supplier_id new_name - " +
-               str(newSupName) + " -- doc.name = " + doc.name)
-      #3. Preserve the actual Supplier Name exactly as it stands
-      original_supplier_name = doc.supplier_name
-      original_supplier_name = 'AAGROW TEK COATING PRODUCTS'
+
       try:
-         if doc.name != newSupName:
+         if not str(doc.name).startswith(gst_prefix):
+            naming_series_format = f"{gst_prefix}{sg_prefix}.#####"
+            newSupName = make_autoname(naming_series_format)
+            log.info("update_supplier_id new_name - " +
+                     str(newSupName) + " -- doc.name = " + doc.name)
+            # 3. Preserve the actual Supplier Name exactly as it stands
+            original_supplier_name = doc.supplier_name
             # 4. Fire the deferred structural rename against the unique ID
             frappe.enqueue(
-               "frappe.model.rename_doc.rename_doc",
+               "vbint.vbint.api.supplier_id_generator.execute_sequential_rename",  # Path to the function below
                doctype="Supplier",
-               old=doc.name,
-               new=newSupName,
-               enqueue_after_commit=True,  # Delays background queue processing safely
-               force=True,                 # Bypasses typical validation blockers
-               ignore_permissions=True     # CRITICAL FIX 2: Ignores system user role constraints
-            )
-            # 3. CRITICAL: Immediately after committing the rename task block, 
-            # force-override the supplier_name field back to its original value.
-            # This breaks Frappe's default behavior of syncing name -> supplier_name.
-            frappe.db.set_value(
-                  "Supplier", 
-                  newSupName, 
-                  "supplier_name", 
-                  original_supplier_name
-            )
+               old_id=doc.name,
+               new_id=newSupName,
+               original_supplier_name=original_supplier_name,
+               enqueue_after_commit=True
+         )
             log.info(f"after frappe.enqueue with parameters")
-         return f"Successfully renamed {doc.name} to {newSupName}."
+         return f"Successfully renamed {doc.name}."
 
       except Exception as e:
          frappe.log_error(title="Rename Doc Error",
@@ -91,3 +81,34 @@ def update_supplier_id(doc, method):
          log.info(f"rename failed.")
          frappe.throw("Failed to rename document.")
 
+
+def execute_sequential_rename(doctype, old_id, new_id, original_supplier_name):
+   """Executes sequentially inside the background worker thread."""
+   log.info(f"execute_sequential_rename() called")
+   log.info(f"doctype = {doctype} -- old_id = {old_id} --- new_id = {new_id} --- original_supplier_name = {original_supplier_name}")
+   # Step 1: Perform the structural rename across all tables
+   frappe.enqueue(
+      "frappe.model.rename_doc.rename_doc",
+      doctype="Supplier",
+      old=old_id,
+      new=new_id,
+      enqueue_after_commit=True,
+      force=True,
+      ignore_permissions=True,
+      now=True  # Runs synchronously
+   )
+   log.info(f"step 1 rename completed")
+   # Step 2: Now that the rename is 100% complete on this thread,
+   # safely restore the original supplier_name field.
+   frappe.db.set_value(
+       doctype,
+       new_id,
+       "supplier_name",
+       original_supplier_name,
+       update_modified=False  # Prevents changing the modified timestamp if undesired
+   )
+   log.info(f"step 2 original supplier name updated")
+
+   # Step 3: Commit the thread's transaction
+   frappe.db.commit()
+   log.info(f"step 3 db commit")

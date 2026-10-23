@@ -664,6 +664,7 @@ def get_rows(
    records = []
    # print("employee_details = " + str(employee_details))
    overtime_map = get_overtime_records(filters)
+   print("overtime_map = "+str(overtime_map))
    for employee, details in employee_details.items():
       holidays = employee_holiday_map.get(employee, [])
       otRecs = overtime_map.get(employee, [])
@@ -672,6 +673,8 @@ def get_rows(
          dateKey = overtRec['ot_date'].strftime("%d-%m-%Y")
          print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
          otValMap[dateKey] = overtRec['othours']
+         otValMap[employee+"_department"] = overtRec['department']
+         otValMap[employee+"_shift"] = overtRec['shift']
          # for key, value in overtRec.items():
          #   print(f"otRecs Key: {key} -> otRecs Value: {value}")
 
@@ -730,8 +733,8 @@ def get_rows(
                {
                   "employee": employee,
                   "employee_name": details.employee_name,
-                  "department": overtRec['department'],
-                  "shift": overtRec['shift']
+                  "department": otValMap[employee+'_department'] if employee+'_department' in otValMap else None,
+                  "shift": otValMap[employee+'_shift'] if employee+'_shift' in otValMap else None,
                }
             )
             log.info("detailed_view rec = " + str(attRec))

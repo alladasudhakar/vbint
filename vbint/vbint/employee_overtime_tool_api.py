@@ -142,7 +142,7 @@ def update_overtime_record(name, date, company, rows):
       frappe.db.delete("Employee Overtime Tool Item", {"parent": name})
       # Iterate and append rows to the child table fieldname
       for emp in records:
-         log.info("emp = " + str(emp))
+         #log.info("emp = " + str(emp))
          row = ex_doc.append("employees", {})
          row.employee = emp.get("employee")
          row.employee_name = emp.get("employee_name")
@@ -150,6 +150,7 @@ def update_overtime_record(name, date, company, rows):
          row.shift = emp.get("shift")
          row.othours = emp.get("othours")
       ex_doc.save()
+      frappe.db.commit()
       return "Success"
    except Exception as ex:
       log.error("error", ex)

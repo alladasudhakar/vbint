@@ -201,7 +201,7 @@ def get_columns(filters: Filters) -> list[dict]:
          {
             "label": _("Employee"),
             "fieldname": "employee",
-            "fieldtype": "Link",
+            "fieldtype": "Data",
             "options": "Employee",
             "width": 135,
          },
@@ -265,8 +265,22 @@ def get_columns(filters: Filters) -> list[dict]:
          ]
       )
    else:
-      columns.append({"label": _("Shift"), "fieldname": "shift",
-                     "fieldtype": "Data", "width": 120})
+      columns.append(
+         {
+            "label": _("Department"),
+            "fieldname": "department",
+            "fieldtype": "Data",
+            "width": 120
+         }
+      )
+      columns.append(
+         {
+            "label": _("Shift"),
+            "fieldname": "shift",
+            "fieldtype": "Data",
+            "width": 120
+         }
+      )
       columns.extend(get_columns_for_days(filters))
 
    return columns
@@ -466,7 +480,7 @@ def get_overtime_records(filters: Filters) -> list[dict]:
    ot_tool = frappe.qb.DocType("Employee Overtime Tool")
    ot_tool_item = frappe.qb.DocType("Employee Overtime Tool Item")
    attendance_date_condition = get_date_condition(
-       ot_tool.date, filters)
+       ot_tool.ot_date, filters)
    log.info("attendance_date_condition = " + str(attendance_date_condition))
    query = (
       frappe.qb.from_(ot_tool_item)
@@ -475,14 +489,16 @@ def get_overtime_records(filters: Filters) -> list[dict]:
       .select(
          ot_tool_item.employee,
          ot_tool_item.employee_name,
+         ot_tool_item.department,
+         ot_tool_item.shift,
          ot_tool_item.othours,
-         ot_tool.date,
+         ot_tool.ot_date,
       )
       .where(attendance_date_condition)
       .where(ot_tool_item.parenttype == "Employee Overtime Tool")
    )
    otRecs = query.run(as_dict=True)
-   #log.info("otRecs = " + str(otRecs))
+   # log.info("otRecs = " + str(otRecs))
    # Maps items to the employee
    # items_map = {ot['employee']: ot for ot in items}
    # Initialize a defaultdict with a list factory
@@ -646,14 +662,14 @@ def get_rows(
         employee_details: dict, filters: Filters, employee_holiday_map: dict, attendance_map: dict
 ) -> list[dict]:
    records = []
-   print("employee_details = " + str(employee_details))
+   # print("employee_details = " + str(employee_details))
    overtime_map = get_overtime_records(filters)
    for employee, details in employee_details.items():
       holidays = employee_holiday_map.get(employee, [])
       otRecs = overtime_map.get(employee, [])
       otValMap = {}
       for overtRec in otRecs:
-         dateKey = overtRec['date'].strftime("%d-%m-%Y")
+         dateKey = overtRec['ot_date'].strftime("%d-%m-%Y")
          print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
          otValMap[dateKey] = overtRec['othours']
          # for key, value in overtRec.items():
@@ -677,7 +693,10 @@ def get_rows(
          leave_summary = get_leave_summary(employee, filters)
          entry_exits_summary = get_entry_exits_summary(employee, filters)
 
-         row = {"employee": employee, "employee_name": details.employee_name}
+         row = {
+            "employee": employee,
+            "employee_name": details.employee_name
+         }
          set_defaults_for_summarized_view(filters, row)
          row.update(attendance)
          row.update(leave_summary)
@@ -708,7 +727,13 @@ def get_rows(
                else:
                   attRec[key] = 0
             attRec.update(
-               {"employee": employee, "employee_name": details.employee_name})
+               {
+                  "employee": employee,
+                  "employee_name": details.employee_name,
+                  "department": overtRec['department'],
+                  "shift": overtRec['shift']
+               }
+            )
             log.info("detailed_view rec = " + str(attRec))
             if otExists:
                records.append(attRec)

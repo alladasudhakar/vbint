@@ -121,6 +121,8 @@ def create_overtime_record(date, company, rows):
       row = new_doc.append("employees", {})
       row.employee = emp.get("employee")
       row.employee_name = emp.get("employee_name")
+      row.department = emp.get("department")
+      row.shift = emp.get("shift")
       row.othours = emp.get("othours")
       
    new_doc.insert()
@@ -144,6 +146,8 @@ def update_overtime_record(name, date, company, rows):
          row = ex_doc.append("employees", {})
          row.employee = emp.get("employee")
          row.employee_name = emp.get("employee_name")
+         row.department = emp.get("department")
+         row.shift = emp.get("shift")
          row.othours = emp.get("othours")
       ex_doc.save()
       return "Success"

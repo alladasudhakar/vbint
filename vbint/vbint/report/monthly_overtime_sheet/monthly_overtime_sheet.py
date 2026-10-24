@@ -673,8 +673,20 @@ def get_rows(
          dateKey = overtRec['ot_date'].strftime("%d-%m-%Y")
          print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
          otValMap[dateKey] = overtRec['othours']
-         otValMap[employee+"_department"] = overtRec['department']
-         otValMap[employee+"_shift"] = overtRec['shift']
+         depts = otValMap[employee+"_department"] if employee+"_department" in otValMap else ""
+         if overtRec['department']:
+            if len(str(depts)) > 0:
+               depts += ", " + str(overtRec['department'])
+            else:
+               depts = str(overtRec['department'])
+         otValMap[employee+"_department"] = depts
+         shifts = otValMap[employee+"_shift"] if employee+"_shift" in otValMap else ""
+         if overtRec['shift']:
+            if len(str(shifts)) > 0:
+               shifts += ", " + str(overtRec['shift'])
+            else:
+               shifts = str(overtRec['shift'])
+         otValMap[employee+"_shift"] = shifts
          # for key, value in overtRec.items():
          #   print(f"otRecs Key: {key} -> otRecs Value: {value}")
 

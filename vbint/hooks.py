@@ -155,11 +155,11 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
-   # "cron": {
-   #    "*/10 * * * *": [
-   #       "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
-   #    ]
-   # },
+   "cron": {
+      "*/10 * * * *": [
+         "vbint.vbint.update_supplier_id.update_supplier_ids"
+      ]
+   },
    #"hourly": [
    #   "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
    #],

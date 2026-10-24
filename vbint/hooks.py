@@ -160,9 +160,9 @@ scheduler_events = {
    #       "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
    #    ]
    # },
-   "hourly": [
-      "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
-   ],
+   #"hourly": [
+   #   "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
+   #],
    # 	"all": [
    # 		"vbint.tasks.all"
    # 	],

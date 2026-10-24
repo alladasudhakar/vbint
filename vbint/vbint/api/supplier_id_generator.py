@@ -47,11 +47,11 @@ def update_supplier_id(doc, method):
       sg_start = doc.supplier_group.upper()[:2]
       sg_prefix = ""
       if sg_start == "RM":
-         sg_prefix = "10"
+         sg_prefix = "01"
       elif sg_start == "PM":
-         sg_prefix = "20"
+         sg_prefix = "02"
       elif sg_start == "FG":
-         sg_prefix = "30"
+         sg_prefix = "04"
       else:
          sg_prefix = "00"
 

@@ -17,7 +17,7 @@ def update_supplier_ids():
    records = frappe.get_all(
       "Supplier",
       filters={
-         "customer_name": ("REGEXP", "^[a-zA-Z]")  # Starts with an English alphabet letter
+         "name": ("REGEXP", "^[a-zA-Z]")  # Starts with an English alphabet letter
       },
       # 'items' is the child table fieldname on the Sales Order DocType
       fields=[

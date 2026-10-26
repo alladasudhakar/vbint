@@ -148,23 +148,23 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"vbint.tasks.all"
-# 	],
-# 	"daily": [
-# 		"vbint.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"vbint.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"vbint.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"vbint.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+   # 	"all": [
+   # 		"vbint.tasks.all"
+   # 	],
+   # 	"daily": [
+   # 		"vbint.tasks.daily"
+   # 	],
+   "hourly": [
+     "vbint.vbint.overtime_monthly_submission.submit_monthly_overtime"
+   ],
+   # 	"weekly": [
+   # 		"vbint.tasks.weekly"
+   # 	],
+   # 	"monthly": [
+   # 		"vbint.tasks.monthly"
+   # 	],
+}
 
 # Testing
 # -------
@@ -246,4 +246,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

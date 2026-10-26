@@ -83,12 +83,12 @@ def submit_monthly_overtime():
    records = frappe.get_all(
       "Employee Overtime Tool",
       filters=[
-         ["date", "between", [dates[0], dates[1]]]
+         ["ot_date", "between", [dates[0], dates[1]]]
       ],
       # 'items' is the child table fieldname on the Sales Order DocType
       fields=[
          "name",
-         "date",
+         "ot_date",
          "employees.employee",
          # "employees.employee_name",
          "employees.othours"

@@ -90,8 +90,8 @@ def execute(filters: Filters | None = None) -> tuple:
                       alert=True, indicator="orange")
       return columns, [], None, None
 
-   message = get_message() if not filters.summarized_view else ""
-   chart = get_chart_data(attendance_map, filters)
+   #message = get_message() if not filters.summarized_view else ""
+   #chart = get_chart_data(attendance_map, filters)
 
    return columns, data, "", None
 
@@ -545,7 +545,7 @@ def get_employee_related_details(filters: Filters) -> tuple[dict, list]:
        )
        .where(Employee.company.isin(filters.companies))
    )
-   print("\n\nfilters = " + str(filters))
+
    if filters.employee:
       query = query.where(Employee.name == filters.employee)
    if filters.department and filters.department != "All Departments":
@@ -961,23 +961,6 @@ def get_entry_exits_summary(employee: str, filters: Filters) -> dict[str, float]
    ).run(as_dict=True)
 
    return entry_exits[0]
-
-
-@frappe.whitelist()
-def get_attendance_years() -> str:
-   """Returns all the years for which attendance records exist"""
-   Attendance = frappe.qb.DocType("Attendance")
-   year_list = (
-       frappe.qb.from_(Attendance).select(
-          Extract("year", Attendance.attendance_date).as_("year")).distinct()
-   ).run(as_dict=True)
-
-   if year_list:
-      year_list.sort(key=lambda d: d.year, reverse=True)
-   else:
-      year_list = [frappe._dict({"year": getdate().year})]
-
-   return "\n".join(cstr(entry.year) for entry in year_list)
 
 
 def get_chart_data(attendance_map: dict, filters: Filters) -> dict:

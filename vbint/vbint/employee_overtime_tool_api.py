@@ -15,7 +15,7 @@ def get_employees_for_tool(date, company, department=None, shift=None):
    log.info("get_employees_for_tool() filters = " + str(filters))
    try:
       employees = frappe.get_all(
-         "Employee", fields=["name", "employee_name"],
+         "Employee", fields=["name", "employee_name", "department"],
          filters=filters, order_by="employee_name asc"
       )
 

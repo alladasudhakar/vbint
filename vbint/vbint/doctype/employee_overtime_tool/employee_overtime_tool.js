@@ -22,12 +22,20 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Set date to today only if it's a new document and currently empty
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
+         frappe.show_alert({
+            message: __('ot_date updated 1.'),
+            indicator: 'warning'
+         });
       }
    },
 
    refresh: function (frm) {
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
+         frappe.show_alert({
+            message: __('ot_date updated 2.'),
+            indicator: 'warning'
+         });
       }
       fetch_and_cache_employees(frm);
 
@@ -42,7 +50,6 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Auto-fetch when fields change
       frm.fields_dict['ot_date'].df.change = () => frm.trigger('fetch_and_cache_employees');
       frm.fields_dict['company'].df.change = () => frm.trigger('fetch_and_cache_employees');
-      frm.fields_dict['department'].df.change = () => frm.trigger('fetch_and_cache_employees');
    },
 
    save_overtime: function (frm) {
@@ -125,6 +132,7 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
    // Sync employee metadata elements automatically
    employee: function (frm, cdt, cdn) {
       let row = locals[cdt][cdn];
+      frappe.msgprint(__('employee change'));
       if (row.employee) {
          //fetch employee data from cache
          const targetEmployee = custom_cache.employees.find(emp => emp.name === row.employee);
@@ -142,6 +150,21 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          } else {
             frappe.model.set_value(cdt, cdn, 'employee_name', '');
          }
+
+         if (targetEmployee) {
+            let dept = targetEmployee.department;
+            if (dept) {
+               //remove leading/trailing spaces
+               dept = dept.trim();
+               // Replaces any sequence of 2 or more spaces with 1 space
+               dept = dept.replace(/ +/g, " ");
+            } else {
+               dept = "";
+            }
+            frappe.model.set_value(cdt, cdn, 'department', dept);
+         } else {
+            frappe.model.set_value(cdt, cdn, 'department', '');
+         }
          /*
          //Fetch employee data from database directly (which requires Employee permission)
          frappe.db.get_value('Employee', row.employee, 'employee_name', (r) => {
@@ -151,8 +174,17 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          });*/
       } else {
          frappe.model.set_value(cdt, cdn, 'employee_name', '');
+         frappe.model.set_value(cdt, cdn, 'department', '');
       }
-   }
+   },
+   othours: function(frm, cdt, cdn) {
+      frappe.msgprint(__('othours change'));
+      let row = locals[cdt][cdn];
+      //let row = frappe.get_doc(cdt, cdn);
+      // Correct method: This updates the field AND triggers the "Not Saved" state
+      frappe.model.set_value(cdt, cdn, 'othours', row.othours);
+      frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
+    }
 });
 
 // Function to fetch and cache data locally

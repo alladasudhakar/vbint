@@ -179,7 +179,6 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
       //let row = frappe.get_doc(cdt, cdn);
       // Correct method: This updates the field AND triggers the "Not Saved" state
       //frappe.model.set_value(cdt, cdn, 'othours', row.othours);
-      frm.fields_dict['employees'].grid.refresh();
       frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
       frm.dirty();
       frm.dashboard.set_dirty();
@@ -188,6 +187,7 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          active_frm.dirty();
          active_frm.dashboard.set_dirty();
       }
+      frm.fields_dict['employees'].grid.refresh();
    }
 });
 

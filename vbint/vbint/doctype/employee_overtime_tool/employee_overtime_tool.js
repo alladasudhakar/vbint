@@ -4,6 +4,8 @@
 //Define a global namespace to store your cached employee list
 frappe.provide('custom_cache');
 
+let active_frm = cur_frm;
+
 // 1. Force the field UI to display Name alongside ID after selection
 frappe.form.link_formatters['Employee'] = function (value, doc) {
    // If the data is currently loading or empty, return default
@@ -172,7 +174,7 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          frappe.model.set_value(cdt, cdn, 'department', '');
       }
    },
-   othours: function(frm, cdt, cdn) {
+   othours: function (frm, cdt, cdn) {
       let row = locals[cdt][cdn];
       //let row = frappe.get_doc(cdt, cdn);
       // Correct method: This updates the field AND triggers the "Not Saved" state
@@ -181,7 +183,11 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
       frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
       frm.dirty();
       frm.dashboard.set_dirty();
-    }
+      if (active_frm) {
+         active_frm.dirty();
+         active_frm.dashboard.set_dirty();
+      }
+   }
 });
 
 // Function to fetch and cache data locally

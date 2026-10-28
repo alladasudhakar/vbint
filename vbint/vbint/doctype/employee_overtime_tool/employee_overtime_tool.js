@@ -22,10 +22,6 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Set date to today only if it's a new document and currently empty
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
-         frappe.show_alert({
-            message: __('ot_date updated 1.'),
-            indicator: 'warning'
-         });
       }
    },
 
@@ -132,7 +128,6 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
    // Sync employee metadata elements automatically
    employee: function (frm, cdt, cdn) {
       let row = locals[cdt][cdn];
-      frappe.msgprint(__('employee change'));
       if (row.employee) {
          //fetch employee data from cache
          const targetEmployee = custom_cache.employees.find(emp => emp.name === row.employee);
@@ -178,12 +173,14 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
       }
    },
    othours: function(frm, cdt, cdn) {
-      frappe.msgprint(__('othours change'));
       let row = locals[cdt][cdn];
       //let row = frappe.get_doc(cdt, cdn);
       // Correct method: This updates the field AND triggers the "Not Saved" state
-      frappe.model.set_value(cdt, cdn, 'othours', row.othours);
+      //frappe.model.set_value(cdt, cdn, 'othours', row.othours);
+      frm.fields_dict['employees'].grid.refresh();
       frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
+      frm.dirty();
+      frm.dashboard.set_dirty();
     }
 });
 

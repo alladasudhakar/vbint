@@ -183,6 +183,7 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
       frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
       frm.dirty();
       frm.dashboard.set_dirty();
+      frappe.model.set_value(row.doctype, row.name, 'othours', row.othours);
       if (active_frm) {
          active_frm.dirty();
          active_frm.dashboard.set_dirty();

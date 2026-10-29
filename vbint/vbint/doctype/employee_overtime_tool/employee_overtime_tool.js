@@ -24,16 +24,14 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Set date to today only if it's a new document and currently empty
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
+      } else {
+         frm.page.clear_indicator();
       }
    },
 
    refresh: function (frm) {
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
-         frappe.show_alert({
-            message: __('ot_date updated 2.'),
-            indicator: 'warning'
-         });
       }
       fetch_and_cache_employees(frm);
 
@@ -48,6 +46,26 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Auto-fetch when fields change
       frm.fields_dict['ot_date'].df.change = () => frm.trigger('fetch_and_cache_employees');
       frm.fields_dict['company'].df.change = () => frm.trigger('fetch_and_cache_employees');
+   },
+
+   ot_date: function (frm) {
+      if (frm.doc.ot_date) {
+         frm.dirty();
+         frm.refresh_fields();
+         if (frm.is_dirty()) {
+            frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
+   },
+
+   company: function (frm) {
+      if (frm.doc.ot_date) {
+         frm.dirty();
+         frm.refresh_fields();
+         if (frm.is_dirty()) {
+            frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
    },
 
    save_overtime: function (frm) {
@@ -174,20 +192,35 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          frappe.model.set_value(cdt, cdn, 'department', '');
       }
    },
-   othours: function (frm, cdt, cdn) {
+   department: function (frm, cdt, cdn) {
       let row = locals[cdt][cdn];
-      //let row = frappe.get_doc(cdt, cdn);
-      // Correct method: This updates the field AND triggers the "Not Saved" state
-      //frappe.model.set_value(cdt, cdn, 'othours', row.othours);
-      frappe.show_alert({ message: __('othours modified!'), indicator: 'green' });
-      frm.dirty();
-      frm.dashboard.set_dirty();
-      frappe.model.set_value(row.doctype, row.name, 'othours', row.othours);
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
       if (active_frm) {
          active_frm.dirty();
-         active_frm.dashboard.set_dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
       }
-      frm.fields_dict['employees'].grid.refresh();
+   },
+   shift: function (frm, cdt, cdn) {
+      let row = locals[cdt][cdn];
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
+      if (active_frm) {
+         active_frm.dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
+   },
+   othours: function (frm, cdt, cdn) {
+      let row = locals[cdt][cdn];
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
+      if (active_frm) {
+         active_frm.dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
    }
 });
 

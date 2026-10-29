@@ -87,7 +87,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
          return;
       }
       if (!frm.doc.employees || frm.doc.employees.length === 0) {
-         frappe.msgprint(__('No employee records available to submit.'));
+         frappe.msgprint(__('Please include employee records.'));
          return;
       }
       if (frm.is_new()) {

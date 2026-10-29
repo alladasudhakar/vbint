@@ -4,6 +4,8 @@
 //Define a global namespace to store your cached employee list
 frappe.provide('custom_cache');
 
+let active_frm = cur_frm;
+
 // 1. Force the field UI to display Name alongside ID after selection
 frappe.form.link_formatters['Employee'] = function (value, doc) {
    // If the data is currently loading or empty, return default
@@ -22,6 +24,8 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Set date to today only if it's a new document and currently empty
       if (frm.is_new() && !frm.doc.ot_date) {
          frm.set_value('ot_date', frappe.datetime.get_today());
+      } else {
+         frm.page.clear_indicator();
       }
    },
 
@@ -42,7 +46,26 @@ frappe.ui.form.on("Employee Overtime Tool", {
       // Auto-fetch when fields change
       frm.fields_dict['ot_date'].df.change = () => frm.trigger('fetch_and_cache_employees');
       frm.fields_dict['company'].df.change = () => frm.trigger('fetch_and_cache_employees');
-      frm.fields_dict['department'].df.change = () => frm.trigger('fetch_and_cache_employees');
+   },
+
+   ot_date: function (frm) {
+      if (frm.doc.ot_date) {
+         frm.dirty();
+         frm.refresh_fields();
+         if (frm.is_dirty()) {
+            frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
+   },
+
+   company: function (frm) {
+      if (frm.doc.ot_date) {
+         frm.dirty();
+         frm.refresh_fields();
+         if (frm.is_dirty()) {
+            frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
    },
 
    save_overtime: function (frm) {
@@ -64,7 +87,7 @@ frappe.ui.form.on("Employee Overtime Tool", {
          return;
       }
       if (!frm.doc.employees || frm.doc.employees.length === 0) {
-         frappe.msgprint(__('No employee records available to submit.'));
+         frappe.msgprint(__('Please include employee records.'));
          return;
       }
       if (frm.is_new()) {
@@ -142,6 +165,21 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          } else {
             frappe.model.set_value(cdt, cdn, 'employee_name', '');
          }
+
+         if (targetEmployee) {
+            let dept = targetEmployee.department;
+            if (dept) {
+               //remove leading/trailing spaces
+               dept = dept.trim();
+               // Replaces any sequence of 2 or more spaces with 1 space
+               dept = dept.replace(/ +/g, " ");
+            } else {
+               dept = "";
+            }
+            frappe.model.set_value(cdt, cdn, 'department', dept);
+         } else {
+            frappe.model.set_value(cdt, cdn, 'department', '');
+         }
          /*
          //Fetch employee data from database directly (which requires Employee permission)
          frappe.db.get_value('Employee', row.employee, 'employee_name', (r) => {
@@ -151,6 +189,37 @@ frappe.ui.form.on('Employee Overtime Tool Item', {
          });*/
       } else {
          frappe.model.set_value(cdt, cdn, 'employee_name', '');
+         frappe.model.set_value(cdt, cdn, 'department', '');
+      }
+   },
+   department: function (frm, cdt, cdn) {
+      let row = locals[cdt][cdn];
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
+      if (active_frm) {
+         active_frm.dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
+   },
+   shift: function (frm, cdt, cdn) {
+      let row = locals[cdt][cdn];
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
+      if (active_frm) {
+         active_frm.dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
+      }
+   },
+   othours: function (frm, cdt, cdn) {
+      let row = locals[cdt][cdn];
+      //console.log(`Row ${row.name}: field_name changed from ${row.__original_value} to ${row.othours}`);
+      if (active_frm) {
+         active_frm.dirty();
+         if (active_frm.is_dirty()) {
+            active_frm.page.set_indicator("Not Saved", "orange");
+         }
       }
    }
 });

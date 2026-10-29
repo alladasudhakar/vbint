@@ -237,7 +237,7 @@ def get_columns(filters: Filters) -> list[dict]:
                "label": _("Total Overtime Days"),
                "fieldname": "otdays",
                "fieldtype": "Float",
-               "width": 135,
+               "width": 140,
             },
             {
                "label": _("Unmarked Days"),

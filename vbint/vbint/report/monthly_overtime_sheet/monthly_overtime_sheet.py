@@ -20,10 +20,7 @@ from frappe.utils import add_days, cint, cstr, formatdate, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 from hrms.utils import date_diff, get_date_range
-from hrms.utils.holiday_list import (
-    fill_employee_holiday_list_date_gaps_with_company_holiday_list,
-    get_assigned_holiday_lists_to_employee_and_company,
-)
+from hrms.utils.holiday_list import get_holiday_list_ranges_for_employees, get_holidays_in_ranges_map
 
 Filters = frappe._dict
 
@@ -46,7 +43,11 @@ day_abbr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 def execute(filters: Filters | None = None) -> tuple:
    filters = frappe._dict(filters or {})
-
+   try:
+      hrms_version = frappe.get_attr("hrms.__version__")
+      print(f"HRMS Version: {hrms_version}")
+   except AttributeError:
+      print("HRMS application metadata could not be found.")
    if not filters.filter_based_on:
       frappe.throw(_("Please select Filter Based On"))
 
@@ -89,9 +90,6 @@ def execute(filters: Filters | None = None) -> tuple:
       frappe.msgprint(_("No attendance records found for this criteria."),
                       alert=True, indicator="orange")
       return columns, [], None, None
-
-   #message = get_message() if not filters.summarized_view else ""
-   #chart = get_chart_data(attendance_map, filters)
 
    return columns, data, "", None
 
@@ -148,31 +146,6 @@ def updateDateRange(filters: Filters | None = None) -> Filters:
       filters.end_date = enDt.strftime("%Y-%m-%d")
    print("updateDateRange() returning filters = " + str(filters))
    return filters
-
-
-def get_message() -> str:
-   message = ""
-   colors = [
-       "green",
-       "red",
-       "orange",
-       "#914EE3",
-       "green",
-       "#3187D8",
-       "#878787",
-       "#878787",
-   ]
-
-   count = 0
-   for status, abbr in status_map.items():
-      message += f"""
-                        <span style='border-left: 2px solid {colors[count]}; padding-right: 12px; padding-left: 5px; margin-right: 3px;'>
-                                {_(status)} - {abbr}
-                        </span>
-                """
-      count += 1
-
-   return message
 
 
 def get_columns(filters: Filters) -> list[dict]:
@@ -581,70 +554,18 @@ def get_employee_related_details(filters: Filters) -> tuple[dict, list]:
 
 
 def get_employee_holiday_map(employee_details: dict, filters: Filters) -> dict[str, list[dict]]:
-   """
-   Builds {employee: [holidays]} for all employees in two queries.
-
-   Query 1 — bulk HLA fetch for all employees + their companies.
-   Query 2 — holidays for only the holiday lists employees are actually assigned to.
-
-   Per-employee lookup after this call is an O(1) dict access.
-   """
+   """Builds {employee: [holidays]} for all employees in two queries: one for assignments, one for holidays"""
    if not employee_details:
       return {}
 
    start_date, end_date = get_date_range_from_filters(filters)
-
-   employees = list(employee_details.keys())
-   companies = list(
-      {d.company for d in employee_details.values() if d.get("company")})
-
-   assigned_holiday_lists = get_assigned_holiday_lists_to_employee_and_company(
-       employees + companies, start_date, end_date
+   employee_holiday_list_ranges = get_holiday_list_ranges_for_employees(
+       {employee: details.get("company")
+        for employee, details in employee_details.items()},
+       start_date,
+       end_date,
    )
-
-   # gaps in employee-level assignments are filled with company-level assignments,
-   employee_hl_ranges = {}
-   for employee, details in employee_details.items():
-      employee_ranges = assigned_holiday_lists.get(employee, [])
-      company_ranges = assigned_holiday_lists.get(details.get("company"), [])
-      ranges = fill_employee_holiday_list_date_gaps_with_company_holiday_list(
-          employee_ranges, company_ranges, start_date, end_date
-      )
-      if ranges:
-         employee_hl_ranges[employee] = ranges
-
-   if not employee_hl_ranges:
-      return {}
-
-   # collect only the HL names employees are actually assigned to
-   used_hl_names = {r["holiday_list"]
-                    for ranges in employee_hl_ranges.values() for r in ranges}
-
-   Holiday = frappe.qb.DocType("Holiday")
-   holiday_rows = (
-       frappe.qb.from_(Holiday)
-       .select(Holiday.parent, Holiday.holiday_date, Holiday.weekly_off)
-       .where(Holiday.parent.isin(list(used_hl_names)))
-       .where(Holiday.holiday_date.between(start_date, end_date))
-   ).run(as_dict=True)
-
-   hl_holidays = {}
-   for h in holiday_rows:
-      hl_holidays.setdefault(h.parent, []).append(h)
-
-   # filter holidays to each employee's effective ranges
-   employee_holiday_map = {}
-   for employee, ranges in employee_hl_ranges.items():
-      holidays = [
-          h
-          for r in ranges
-          for h in hl_holidays.get(r["holiday_list"], [])
-          if r["from_date"] <= getdate(h.holiday_date) <= r["to_date"]
-      ]
-      if holidays:
-         employee_holiday_map[employee] = holidays
-
-   return employee_holiday_map
+   return get_holidays_in_ranges_map(employee_holiday_list_ranges)
 
 
 def get_date_range_from_filters(filters: Filters) -> tuple:
@@ -664,7 +585,7 @@ def get_rows(
    records = []
    # print("employee_details = " + str(employee_details))
    overtime_map = get_overtime_records(filters)
-   print("overtime_map = "+str(overtime_map))
+   print("overtime_map = " + str(overtime_map))
    for employee, details in employee_details.items():
       holidays = employee_holiday_map.get(employee, [])
       otRecs = overtime_map.get(employee, [])
@@ -673,20 +594,22 @@ def get_rows(
          dateKey = overtRec['ot_date'].strftime("%d-%m-%Y")
          print(f"otRecs Key: {dateKey} -> otRecs Value: {overtRec['othours']}")
          otValMap[dateKey] = overtRec['othours']
-         depts = otValMap[employee+"_department"] if employee+"_department" in otValMap else ""
+         depts = otValMap[employee + "_department"] if employee + \
+             "_department" in otValMap else ""
          if overtRec['department']:
             if len(str(depts)) > 0:
                depts += ", " + str(overtRec['department'])
             else:
                depts = str(overtRec['department'])
-         otValMap[employee+"_department"] = depts
-         shifts = otValMap[employee+"_shift"] if employee+"_shift" in otValMap else ""
+         otValMap[employee + "_department"] = depts
+         shifts = otValMap[employee + "_shift"] if employee + \
+             "_shift" in otValMap else ""
          if overtRec['shift']:
             if len(str(shifts)) > 0:
                shifts += ", " + str(overtRec['shift'])
             else:
                shifts = str(overtRec['shift'])
-         otValMap[employee+"_shift"] = shifts
+         otValMap[employee + "_shift"] = shifts
          # for key, value in overtRec.items():
          #   print(f"otRecs Key: {key} -> otRecs Value: {value}")
 
@@ -745,8 +668,8 @@ def get_rows(
                {
                   "employee": employee,
                   "employee_name": details.employee_name,
-                  "department": otValMap[employee+'_department'] if employee+'_department' in otValMap else None,
-                  "shift": otValMap[employee+'_shift'] if employee+'_shift' in otValMap else None,
+                  "department": otValMap[employee + '_department'] if employee + '_department' in otValMap else None,
+                  "shift": otValMap[employee + '_shift'] if employee + '_shift' in otValMap else None,
                }
             )
             log.info("detailed_view rec = " + str(attRec))
